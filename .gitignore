@@ -73,3 +73,6 @@ Testing/
 
 # CMake Presets
 CMakePresets.json
+
+# VS Code
+.vscode
