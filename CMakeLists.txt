@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Eigen3 REQUIRED)
 
 add_library(hc
+    src/variable.cpp
     src/polynomial.cpp
     src/system.cpp
     src/differentiation.cpp
