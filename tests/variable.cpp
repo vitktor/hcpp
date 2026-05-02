@@ -1,15 +1,22 @@
 #include <hc/core/variable.hpp>
+#include <cassert>
 #include <iostream>
 
 int main() {
-    auto [x, y, z] = hc::make_variables("x", "y", "z");
-    std::cout << x.name << "\n";
-    std::cout << y.name << "\n";
-    std::cout << z.name << "\n";
+    auto vars = hc::make_variables({"x", "y", "z"});
+    assert(vars.size() == 3);
+    assert(vars[0].name == "x");
+    assert(vars[1].name == "y");
+    assert(vars[2].name == "z");
 
-    auto vars = hc::make_variables({"a", "b", "c"});
-    for (const auto& v : vars)
-        std::cout << v.name << "\n";
+    hc::Variable a("a"), b("b");
+    assert(a.name == "a");
+    assert(b.name == "b");
 
+    hc::Variable alpha("α"), beta("β");
+    assert(alpha.name == "α");
+    assert(beta.name == "β");
+
+    std::cout << "All tests passed\n";
     return 0;
 }
