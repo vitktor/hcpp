@@ -10,7 +10,7 @@ namespace hc
         return vars;
     }
 
-    MergedVars merge_vars(
+    MergedVars merge_sorted_vars(
         const std::vector<Variable>& vars1,
         const std::vector<Variable>& vars2
     )

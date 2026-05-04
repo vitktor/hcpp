@@ -1,22 +1,52 @@
+#include <gtest/gtest.h>
 #include <hc/core/variable.hpp>
-#include <cassert>
-#include <iostream>
 
-int main() {
+TEST(MakeVariables, CreatesAndSorts) {
     auto vars = hc::make_variables({"x", "y", "z"});
-    assert(vars.size() == 3);
-    assert(vars[0].name == "x");
-    assert(vars[1].name == "y");
-    assert(vars[2].name == "z");
+    EXPECT_EQ(vars.size(), 3);
+    EXPECT_EQ(vars[0].name, "x");
+    EXPECT_EQ(vars[1].name, "y");
+    EXPECT_EQ(vars[2].name, "z");
+}
 
-    hc::Variable a("a"), b("b");
-    assert(a.name == "a");
-    assert(b.name == "b");
-
+TEST(MakeVariables, UnicodeNames) {
     hc::Variable alpha("α"), beta("β");
-    assert(alpha.name == "α");
-    assert(beta.name == "β");
+    EXPECT_EQ(alpha.name, "α");
+    EXPECT_EQ(beta.name, "β");
+}
 
-    std::cout << "All tests passed\n";
-    return 0;
+TEST(MergeSortedVars, DisjointSets) {
+    auto v1 = hc::make_variables({"x", "z"});
+    auto v2 = hc::make_variables({"y"});
+    auto r = hc::merge_sorted_vars(v1, v2);
+    EXPECT_EQ(r.vars, hc::make_variables({"x", "y", "z"}));
+    EXPECT_EQ(r.map1, (std::vector<int>{0, 2}));
+    EXPECT_EQ(r.map2, (std::vector<int>{1}));
+}
+
+TEST(MergeSortedVars, Overlap) {
+    auto v1 = hc::make_variables({"x", "y"});
+    auto v2 = hc::make_variables({"y", "z"});
+    auto r = hc::merge_sorted_vars(v1, v2);
+    EXPECT_EQ(r.vars, hc::make_variables({"x", "y", "z"}));
+    EXPECT_EQ(r.map1, (std::vector<int>{0, 1}));
+    EXPECT_EQ(r.map2, (std::vector<int>{1, 2}));
+}
+
+TEST(MergeSortedVars, IdenticalSets) {
+    auto v1 = hc::make_variables({"x", "y"});
+    auto v2 = hc::make_variables({"x", "y"});
+    auto r = hc::merge_sorted_vars(v1, v2);
+    EXPECT_EQ(r.vars, hc::make_variables({"x", "y"}));
+    EXPECT_EQ(r.map1, (std::vector<int>{0, 1}));
+    EXPECT_EQ(r.map2, (std::vector<int>{0, 1}));
+}
+
+TEST(MergeSortedVars, OneEmpty) {
+    auto v1 = hc::make_variables({"x", "y"});
+    auto v2 = std::vector<hc::Variable>{};
+    auto r = hc::merge_sorted_vars(v1, v2);
+    EXPECT_EQ(r.vars, hc::make_variables({"x", "y"}));
+    EXPECT_EQ(r.map1, (std::vector<int>{0, 1}));
+    EXPECT_TRUE(r.map2.empty());
 }

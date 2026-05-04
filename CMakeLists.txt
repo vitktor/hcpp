@@ -5,6 +5,8 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Eigen3 REQUIRED)
+find_package(GTest REQUIRED)
+enable_testing()
 
 add_library(hc
     src/variable.cpp
@@ -26,4 +28,6 @@ target_include_directories(hc PUBLIC include)
 target_link_libraries(hc PUBLIC Eigen3::Eigen)
 
 add_executable(tests tests/variable.cpp)
-target_link_libraries(tests PRIVATE hc)
+target_link_libraries(tests PRIVATE hc GTest::gtest_main)
+include(GoogleTest)
+gtest_discover_tests(tests)

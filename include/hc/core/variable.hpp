@@ -21,7 +21,7 @@ namespace hc
     };
 
     std::vector<Variable> make_variables(std::initializer_list<std::string> names);
-    MergedVars merge_vars(
+    MergedVars merge_sorted_vars(
         const std::vector<Variable>& vars1,
         const std::vector<Variable>& vars2
     );
