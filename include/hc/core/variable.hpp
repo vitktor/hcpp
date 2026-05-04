@@ -9,19 +9,20 @@ namespace hc
     {
         std::string name;
         Variable(std::string name) : name(std::move(name)) {}
+        bool operator==(const Variable& other) const { return name == other.name; }
+        bool operator<(const Variable& other) const { return name < other.name; }
     };
 
-    template <typename... Names>
-    auto make_variables(Names&&... names)
-    {
-        return std::make_tuple(Variable(std::forward<Names>(names))...);
-    }
-
-    inline std::vector<Variable> make_variables(std::initializer_list<std::string> names)
+    struct MergedVars
     {
         std::vector<Variable> vars;
-        for (const auto& name : names)
-            vars.emplace_back(name);
-        return vars;
-    }
+        std::vector<int> map1;
+        std::vector<int> map2;
+    };
+
+    std::vector<Variable> make_variables(std::initializer_list<std::string> names);
+    MergedVars merge_vars(
+        const std::vector<Variable>& vars1,
+        const std::vector<Variable>& vars2
+    );
 }
