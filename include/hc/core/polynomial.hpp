@@ -2,6 +2,8 @@
 #include <vector>
 #include <Eigen/Dense>
 
+#include <hc/core/variable.hpp>
+
 namespace hc
 {
     template <typename T>
@@ -36,9 +38,23 @@ namespace hc
             return exps;
         }
 
-        void setExponents(Eigen:MatrixXi exponents)
+        void setExponents(Eigen::MatrixXi exponents)
         {
             exps = std::move(exponents);
+        }
+
+        int degree() const
+        {
+            if (exps.cols() == 0) return -1;
+            return static_cast<int>(exps.colwise().sum().maxCoeff());
+        }
+
+        int degree(const Variable& var) const
+        {
+            auto it = std::find(vars.begin(), vars.end(), var);
+            if (it == vars.end()) return 0;
+            auto id = it - vars.begin();
+            return static_cast<int>(exps.row(id).maxCoeff());
         }
 
     private:
@@ -46,4 +62,10 @@ namespace hc
         Eigen::MatrixXi exps;
         std::vector<Variable> vars;
     };
+
+Polynomial<double> operator+(const Variable& lv, const Variable& rv);
+Polynomial<double> operator-(const Variable& lv, const Variable& rv);
+Polynomial<double> operator*(const Variable& lv, const Variable& rv);
+Polynomial<double> pow(const Variable& lv, int exp);
+
 }
