@@ -71,8 +71,5 @@ Testing/
 # Claude
 .claude
 
-# CMake Presets
-CMakePresets.json
-
 # VS Code
 .vscode
