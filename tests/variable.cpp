@@ -1,18 +1,23 @@
 #include <gtest/gtest.h>
 #include <hc/core/variable.hpp>
 
+TEST(Variable, Constructor) {
+    hc::Variable x("x");
+    EXPECT_EQ(x.name, "x");
+}
+
+TEST(Variable, UnicodeNames) {
+    hc::Variable alpha("α"), beta("β");
+    EXPECT_EQ(alpha.name, "α");
+    EXPECT_EQ(beta.name, "β");
+}
+
 TEST(MakeVariables, CreatesAndSorts) {
     auto vars = hc::make_variables({"x", "y", "z"});
     EXPECT_EQ(vars.size(), 3);
     EXPECT_EQ(vars[0].name, "x");
     EXPECT_EQ(vars[1].name, "y");
     EXPECT_EQ(vars[2].name, "z");
-}
-
-TEST(MakeVariables, UnicodeNames) {
-    hc::Variable alpha("α"), beta("β");
-    EXPECT_EQ(alpha.name, "α");
-    EXPECT_EQ(beta.name, "β");
 }
 
 TEST(MergeSortedVars, DisjointSets) {
