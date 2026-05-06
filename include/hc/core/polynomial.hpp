@@ -10,8 +10,15 @@ namespace hc
     class Polynomial
     {
     public:
-        Polynomial(Eigen::MatrixXi exponents, std::vector<T> coefficients)
-            : exps(std::move(exponents)), coeffs(std::move(coefficients)) {}
+        Polynomial(
+            std::vector<T> coefficients,
+            Eigen::MatrixXi exponents,
+            std::vector<Variable> variables
+        )
+            : coeffs(std::move(coefficients)), exps(std::move(exponents)), vars(std::move(variables))
+            {
+                
+            }
 
         const std::vector<T>& getCoefficients() const
         {
@@ -23,16 +30,6 @@ namespace hc
             coeffs = std::move(coefficients);
         }
 
-        const std::vector<Variable>& getVariables() const
-        {
-            return vars;
-        }
-
-        void setVariables(std::vector<Variable> variables)
-        {
-            vars = std::move(variables);
-        }
-
         const Eigen::MatrixXi& getExponents() const
         {
             return exps;
@@ -41,6 +38,16 @@ namespace hc
         void setExponents(Eigen::MatrixXi exponents)
         {
             exps = std::move(exponents);
+        }
+
+        const std::vector<Variable>& getVariables() const
+        {
+            return vars;
+        }
+
+        void setVariables(std::vector<Variable> variables)
+        {
+            vars = std::move(variables);
         }
 
         int degree() const
