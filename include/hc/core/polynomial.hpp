@@ -75,6 +75,6 @@ namespace hc
 Polynomial<double> operator+(const Variable& lv, const Variable& rv);
 Polynomial<double> operator-(const Variable& lv, const Variable& rv);
 Polynomial<double> operator*(const Variable& lv, const Variable& rv);
-Polynomial<double> pow(const Variable& lv, int exp);
+Polynomial<double> pow(const Variable& var, int exp);
 
 }

@@ -54,3 +54,85 @@ TEST(VariableAddition, DifferentVariablesSorted) {
     auto p = y + x;
     EXPECT_EQ(p.getVariables(), (std::vector<Variable>{x, y}));
 }
+
+TEST(VariableSubtraction, SameVariable) {
+    // x - x = 0
+    Variable x("x");
+    auto p = x - x;
+    EXPECT_EQ(p.getCoefficients(), (std::vector<double>{0.0}));
+    EXPECT_EQ(p.getVariables(), (std::vector<Variable>{}));
+}
+
+TEST(VariableSubtraction, DifferentVariables) {
+    // x - y
+    Variable x("x"), y("y");
+    auto p = x - y;
+    EXPECT_EQ(p.getCoefficients(), (std::vector<double>{1.0, -1.0}));
+    EXPECT_EQ(p.getVariables(), (std::vector<Variable>{x, y}));
+    EXPECT_EQ(p.degree(x), 1);
+    EXPECT_EQ(p.degree(y), 1);
+}
+
+TEST(VariableSubtraction, DifferentVariablesSorted) {
+    // y - x: vars sorted as {x, y}, coeffs {-1, 1}
+    Variable x("x"), y("y");
+    auto p = y - x;
+    EXPECT_EQ(p.getVariables(), (std::vector<Variable>{x, y}));
+    EXPECT_EQ(p.getCoefficients(), (std::vector<double>{-1.0, 1.0}));
+}
+
+TEST(VariableMultiplication, SameVariable) {
+    // x * x = x^2
+    Variable x("x");
+    auto p = x * x;
+    EXPECT_EQ(p.getCoefficients(), (std::vector<double>{1.0}));
+    EXPECT_EQ(p.getVariables(), (std::vector<Variable>{x}));
+    EXPECT_EQ(p.degree(x), 2);
+    EXPECT_EQ(p.degree(), 2);
+}
+
+TEST(VariableMultiplication, DifferentVariables) {
+    // x * y = xy
+    Variable x("x"), y("y");
+    auto p = x * y;
+    EXPECT_EQ(p.getCoefficients(), (std::vector<double>{1.0}));
+    EXPECT_EQ(p.getVariables(), (std::vector<Variable>{x, y}));
+    EXPECT_EQ(p.degree(x), 1);
+    EXPECT_EQ(p.degree(y), 1);
+    EXPECT_EQ(p.degree(), 2);
+}
+
+TEST(VariableMultiplication, DifferentVariablesSorted) {
+    // y * x: vars sorted as {x, y}
+    Variable x("x"), y("y");
+    auto p = y * x;
+    EXPECT_EQ(p.getVariables(), (std::vector<Variable>{x, y}));
+}
+
+TEST(VariablePow, ZeroExponent) {
+    // x^0 = 1 (constant, no variables)
+    Variable x("x");
+    auto p = pow(x, 0);
+    EXPECT_EQ(p.getCoefficients(), (std::vector<double>{1.0}));
+    EXPECT_EQ(p.getVariables(), (std::vector<Variable>{}));
+    EXPECT_EQ(p.degree(), 0);
+}
+
+TEST(VariablePow, OneExponent) {
+    // x^1 = x
+    Variable x("x");
+    auto p = pow(x, 1);
+    EXPECT_EQ(p.getCoefficients(), (std::vector<double>{1.0}));
+    EXPECT_EQ(p.getVariables(), (std::vector<Variable>{x}));
+    EXPECT_EQ(p.degree(x), 1);
+}
+
+TEST(VariablePow, HigherExponent) {
+    // x^5
+    Variable x("x");
+    auto p = pow(x, 5);
+    EXPECT_EQ(p.getCoefficients(), (std::vector<double>{1.0}));
+    EXPECT_EQ(p.getVariables(), (std::vector<Variable>{x}));
+    EXPECT_EQ(p.degree(x), 5);
+    EXPECT_EQ(p.degree(), 5);
+}
