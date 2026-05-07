@@ -23,4 +23,18 @@ namespace hc
             return Polynomial<double>({1.0, 1.0}, exps, vars);
         }
     }
+
+    Polynomial<double> operator-(const Variable& lv, const Variable& rv)
+    {
+        if (lv == rv)
+            return Polynomial<double>(0.0);
+        else
+        {
+            Eigen::MatrixXi exps = Eigen::MatrixXi::Identity(2, 2);
+            if (lv < rv)
+                return Polynomial<double>({1.0, -1.0}, exps, {lv, rv});
+            else
+                return Polynomial<double>({-1.0, 1.0}, exps, {rv, lv});
+        }
+    }
 }

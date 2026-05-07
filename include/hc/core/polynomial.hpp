@@ -16,9 +16,11 @@ namespace hc
             std::vector<Variable> variables
         )
             : coeffs(std::move(coefficients)), exps(std::move(exponents)), vars(std::move(variables))
-            {
-                
-            }
+            {}
+
+        explicit Polynomial(T scalar)
+            : coeffs({scalar}), exps(Eigen::MatrixXi(0, 1)), vars({})
+            {}
 
         const std::vector<T>& getCoefficients() const
         {
