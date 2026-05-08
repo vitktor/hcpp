@@ -27,7 +27,7 @@ public:
     for (size_t i = 0; i < n; ++i)
       idx[i] = i;
     std::sort(idx.begin(), idx.end(),
-              [&](size_t a, size_t b) { return exps[a] < exps[b]; });
+              [&](size_t a, size_t b) { return exps[a] > exps[b]; });
     std::vector<std::vector<int>> sorted_exps(n);
     std::vector<T> sorted_coeffs(n);
     for (size_t i = 0; i < n; ++i) {
@@ -117,10 +117,10 @@ public:
     while (i < n1 && j < n2) {
       auto ki = remap(exps[i], mvars.map1);
       auto kj = remap(poly.exps[j], mvars.map2);
-      if (ki < kj) {
+      if (kj < ki) {
         result_exps.push_back(std::move(ki));
         result_coeffs.push_back(coeffs[i++]);
-      } else if (kj < ki) {
+      } else if (ki < kj) {
         result_exps.push_back(std::move(kj));
         result_coeffs.push_back(poly.coeffs[j++]);
       } else {
