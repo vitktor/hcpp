@@ -10,11 +10,11 @@ template <typename T> class Polynomial
 {
 public:
   Polynomial(std::vector<T> coefficients, std::vector<std::vector<int>> exponents,
-             std::vector<Variable> variables, bool presorted = false)
+             std::vector<Variable> variables, bool sorted_terms = false)
       : coeffs(std::move(coefficients)), exps(std::move(exponents)),
         vars(std::move(variables))
   {
-    if (!presorted)
+    if (!sorted_terms)
       sort_terms();
   }
 
@@ -98,13 +98,6 @@ public:
     MergedVars mvars = merge_sorted_vars(getVariables(), poly.getVariables());
     size_t n_vars = mvars.vars.size();
 
-    auto remap = [&](const std::vector<int>& e, const std::vector<int>& map) {
-      std::vector<int> key(n_vars, 0);
-      for (size_t i = 0; i < map.size(); ++i)
-        key[map[i]] = e[i];
-      return key;
-    };
-
     std::vector<std::vector<int>> result_exps;
     std::vector<T> result_coeffs;
     result_exps.reserve(exps.size() + poly.exps.size());
@@ -115,8 +108,8 @@ public:
     size_t n2 = poly.exps.size();
 
     while (i < n1 && j < n2) {
-      auto ki = remap(exps[i], mvars.map1);
-      auto kj = remap(poly.exps[j], mvars.map2);
+      auto ki = map_exp(exps[i], mvars.map1, n_vars);
+      auto kj = map_exp(poly.exps[j], mvars.map2, n_vars);
       if (kj < ki) {
         result_exps.push_back(std::move(ki));
         result_coeffs.push_back(coeffs[i++]);
@@ -132,33 +125,98 @@ public:
       }
     }
     while (i < n1) {
-      result_exps.push_back(remap(exps[i], mvars.map1));
+      result_exps.push_back(map_exp(exps[i], mvars.map1, n_vars));
       result_coeffs.push_back(coeffs[i++]);
     }
     while (j < n2) {
-      result_exps.push_back(remap(poly.exps[j], mvars.map2));
+      result_exps.push_back(map_exp(poly.exps[j], mvars.map2, n_vars));
       result_coeffs.push_back(poly.coeffs[j++]);
     }
 
     if (result_exps.empty())
       return Polynomial<T>(0);
 
+    constexpr bool sorted_terms = true;
     return Polynomial<T>(std::move(result_coeffs), std::move(result_exps),
-                         std::move(mvars.vars), true);
+                         std::move(mvars.vars), sorted_terms);
   }
 
-  Polynomial<T> operator-(const Polynomial<T>& poly) const
-  {
-  }
+  Polynomial<T> operator-(const Polynomial<T>& poly) const { return *this + (-poly); }
 
   Polynomial<T> operator*(const Polynomial<T>& poly) const
   {
+    MergedVars mvars = merge_sorted_vars(vars, poly.vars);
+    size_t n_vars = mvars.vars.size();
+
+    size_t n1 = exps.size(), n2 = poly.exps.size();
+    std::vector<std::vector<int>> prod_exps;
+    std::vector<T> prod_coeffs;
+    prod_exps.reserve(n1 * n2);
+    prod_coeffs.reserve(n1 * n2);
+
+    for (size_t i = 0; i < n1; ++i) {
+      auto ki = map_exp(exps[i], mvars.map1, n_vars);
+      for (size_t j = 0; j < n2; ++j) {
+        auto kj = map_exp(poly.exps[j], mvars.map2, n_vars);
+        std::vector<int> e(n_vars);
+        for (size_t k = 0; k < n_vars; ++k)
+          e[k] = ki[k] + kj[k];
+        prod_exps.push_back(std::move(e));
+        prod_coeffs.push_back(coeffs[i] * poly.coeffs[j]);
+      }
+    }
+
+    size_t n = prod_exps.size();
+    std::vector<size_t> idx(n);
+    for (size_t k = 0; k < n; ++k)
+      idx[k] = k;
+    std::sort(idx.begin(), idx.end(),
+              [&](size_t a, size_t b) { return prod_exps[a] > prod_exps[b]; });
+
+    std::vector<std::vector<int>> result_exps;
+    std::vector<T> result_coeffs;
+    result_exps.reserve(n);
+    result_coeffs.reserve(n);
+
+    for (size_t k = 0; k < n; ++k) {
+      auto& e = prod_exps[idx[k]];
+      T c = prod_coeffs[idx[k]];
+      if (!result_exps.empty() && result_exps.back() == e) {
+        result_coeffs.back() += c;
+      } else {
+        if (!result_exps.empty() && result_coeffs.back() == T(0)) {
+          result_exps.pop_back();
+          result_coeffs.pop_back();
+        }
+        result_exps.push_back(std::move(e));
+        result_coeffs.push_back(c);
+      }
+    }
+    if (!result_exps.empty() && result_coeffs.back() == T(0)) {
+      result_exps.pop_back();
+      result_coeffs.pop_back();
+    }
+
+    if (result_exps.empty())
+      return Polynomial<T>(T(0));
+
+    return Polynomial<T>(std::move(result_coeffs), std::move(result_exps),
+                         std::move(mvars.vars), true);
   }
 
 private:
   std::vector<T> coeffs;
   std::vector<std::vector<int>> exps;
   std::vector<Variable> vars;
+
+  static std::vector<int> map_exp(const std::vector<int>& e,
+                                  const std::vector<int>& map, size_t n_vars)
+  {
+    std::vector<int> key(n_vars, 0);
+    for (size_t k = 0; k < map.size(); ++k)
+      key[map[k]] = e[k];
+    return key;
+  }
 };
 
 Polynomial<double> operator-(const Variable& var);

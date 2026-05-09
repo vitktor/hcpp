@@ -190,3 +190,49 @@ TEST(PolynomialAddition, MergedVariables) {
   EXPECT_EQ(result.degree(y), 1);
   EXPECT_EQ(result.degree(z), 1);
 }
+
+TEST(PolynomialMultiplication, SameVariable) {
+  // x * x = x^2
+  Variable x("x");
+  Polynomial<double> p1({1.0}, {{1}}, {x});
+  Polynomial<double> p2({1.0}, {{1}}, {x});
+  auto result = p1 * p2;
+  EXPECT_EQ(result.getCoefficients(), (std::vector<double>{1.0}));
+  EXPECT_EQ(result.getVariables(), (std::vector<Variable>{x}));
+  EXPECT_EQ(result.degree(x), 2);
+}
+
+TEST(PolynomialMultiplication, DifferentVariables) {
+  // (2x) * (3y) = 6xy
+  Variable x("x"), y("y");
+  Polynomial<double> p1({2.0}, {{1, 0}}, {x, y});
+  Polynomial<double> p2({3.0}, {{0, 1}}, {x, y});
+  auto result = p1 * p2;
+  EXPECT_EQ(result.getCoefficients(), (std::vector<double>{6.0}));
+  EXPECT_EQ(result.getVariables(), (std::vector<Variable>{x, y}));
+  EXPECT_EQ(result.degree(x), 1);
+  EXPECT_EQ(result.degree(y), 1);
+}
+
+TEST(PolynomialMultiplication, LikeTerms) {
+  // (x + y) * (x - y) = x^2 - y^2
+  Variable x("x"), y("y");
+  Polynomial<double> p1({1.0, 1.0}, {{1, 0}, {0, 1}}, {x, y});
+  Polynomial<double> p2({1.0, -1.0}, {{1, 0}, {0, 1}}, {x, y});
+  auto result = p1 * p2;
+  EXPECT_EQ(result.getVariables(), (std::vector<Variable>{x, y}));
+  EXPECT_EQ(result.degree(x), 2);
+  EXPECT_EQ(result.degree(y), 2);
+  // x^2 before y^2 in decreasing lex
+  EXPECT_EQ(result.getCoefficients(), (std::vector<double>{1.0, -1.0}));
+}
+
+TEST(PolynomialMultiplication, CancellingTerms) {
+  // (x + y) * (x - y) middle terms cancel; x^2 - xy + xy - y^2 = x^2 - y^2
+  // already tested above; verify no xy term
+  Variable x("x"), y("y");
+  Polynomial<double> p1({1.0, 1.0}, {{1, 0}, {0, 1}}, {x, y});
+  Polynomial<double> p2({1.0, -1.0}, {{1, 0}, {0, 1}}, {x, y});
+  auto result = p1 * p2;
+  EXPECT_EQ(result.getCoefficients().size(), 2u);
+}
