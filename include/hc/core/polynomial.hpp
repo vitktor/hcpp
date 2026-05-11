@@ -9,9 +9,11 @@ namespace hc
 template <typename T> class Polynomial
 {
 public:
-  Polynomial(std::vector<T> coefficients, std::vector<std::vector<int>> exponents,
+  Polynomial(std::vector<T> coefficients,
+             std::vector<std::vector<int>> exponents,
              std::vector<Variable> variables, bool sorted_terms = false)
-      : coeffs(std::move(coefficients)), exps(std::move(exponents)),
+      : coeffs(std::move(coefficients)),
+        exps(std::move(exponents)),
         vars(std::move(variables))
   {
     if (!sorted_terms)
@@ -30,7 +32,8 @@ public:
               [&](size_t a, size_t b) { return exps[a] > exps[b]; });
     std::vector<std::vector<int>> sorted_exps(n);
     std::vector<T> sorted_coeffs(n);
-    for (size_t i = 0; i < n; ++i) {
+    for (size_t i = 0; i < n; ++i)
+    {
       sorted_exps[i] = std::move(exps[idx[i]]);
       sorted_coeffs[i] = std::move(coeffs[idx[i]]);
     }
@@ -64,7 +67,8 @@ public:
     if (exps.empty())
       return -1;
     int max_deg = 0;
-    for (const auto& e : exps) {
+    for (const auto& e : exps)
+    {
       int deg = 0;
       for (int x : e)
         deg += x;
@@ -107,28 +111,37 @@ public:
     size_t n1 = exps.size();
     size_t n2 = poly.exps.size();
 
-    while (i < n1 && j < n2) {
+    while (i < n1 && j < n2)
+    {
       auto ki = map_exp(exps[i], mvars.map1, n_vars);
       auto kj = map_exp(poly.exps[j], mvars.map2, n_vars);
-      if (kj < ki) {
+      if (kj < ki)
+      {
         result_exps.push_back(std::move(ki));
         result_coeffs.push_back(coeffs[i++]);
-      } else if (ki < kj) {
+      }
+      else if (ki < kj)
+      {
         result_exps.push_back(std::move(kj));
         result_coeffs.push_back(poly.coeffs[j++]);
-      } else {
+      }
+      else
+      {
         T sum = coeffs[i++] + poly.coeffs[j++];
-        if (sum != T(0)) {
+        if (sum != T(0))
+        {
           result_exps.push_back(std::move(ki));
           result_coeffs.push_back(sum);
         }
       }
     }
-    while (i < n1) {
+    while (i < n1)
+    {
       result_exps.push_back(map_exp(exps[i], mvars.map1, n_vars));
       result_coeffs.push_back(coeffs[i++]);
     }
-    while (j < n2) {
+    while (j < n2)
+    {
       result_exps.push_back(map_exp(poly.exps[j], mvars.map2, n_vars));
       result_coeffs.push_back(poly.coeffs[j++]);
     }
@@ -141,7 +154,10 @@ public:
                          std::move(mvars.vars), sorted_terms);
   }
 
-  Polynomial<T> operator-(const Polynomial<T>& poly) const { return *this + (-poly); }
+  Polynomial<T> operator-(const Polynomial<T>& poly) const
+  {
+    return *this + (-poly);
+  }
 
   Polynomial<T> operator*(const Polynomial<T>& poly) const
   {
@@ -154,9 +170,11 @@ public:
     prod_exps.reserve(n1 * n2);
     prod_coeffs.reserve(n1 * n2);
 
-    for (size_t i = 0; i < n1; ++i) {
+    for (size_t i = 0; i < n1; ++i)
+    {
       auto ki = map_exp(exps[i], mvars.map1, n_vars);
-      for (size_t j = 0; j < n2; ++j) {
+      for (size_t j = 0; j < n2; ++j)
+      {
         auto kj = map_exp(poly.exps[j], mvars.map2, n_vars);
         std::vector<int> e(n_vars);
         for (size_t k = 0; k < n_vars; ++k)
@@ -178,13 +196,18 @@ public:
     result_exps.reserve(n);
     result_coeffs.reserve(n);
 
-    for (size_t k = 0; k < n; ++k) {
+    for (size_t k = 0; k < n; ++k)
+    {
       auto& e = prod_exps[idx[k]];
       T c = prod_coeffs[idx[k]];
-      if (!result_exps.empty() && result_exps.back() == e) {
+      if (!result_exps.empty() && result_exps.back() == e)
+      {
         result_coeffs.back() += c;
-      } else {
-        if (!result_exps.empty() && result_coeffs.back() == T(0)) {
+      }
+      else
+      {
+        if (!result_exps.empty() && result_coeffs.back() == T(0))
+        {
           result_exps.pop_back();
           result_coeffs.pop_back();
         }
@@ -192,7 +215,8 @@ public:
         result_coeffs.push_back(c);
       }
     }
-    if (!result_exps.empty() && result_coeffs.back() == T(0)) {
+    if (!result_exps.empty() && result_coeffs.back() == T(0))
+    {
       result_exps.pop_back();
       result_coeffs.pop_back();
     }
