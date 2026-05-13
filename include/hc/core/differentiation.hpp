@@ -1,0 +1,38 @@
+#pragma once
+#include <hc/core/polynomial.hpp>
+
+namespace hc
+{
+
+template <typename T>
+Polynomial<T> differentiate(const Polynomial<T>& poly, const Variable& var)
+{
+  const auto& vars = poly.getVariables();
+  auto it = std::find(vars.begin(), vars.end(), var);
+  if (it == vars.end())
+    return Polynomial<T>(T(0));
+
+  int var_idx = it - vars.begin();
+  const auto& exps = poly.getExponents();
+  const auto& coeffs = poly.getCoefficients();
+
+  std::vector<std::vector<int>> result_exps;
+  std::vector<T> result_coeffs;
+
+  for (size_t i = 0; i < exps.size(); ++i) {
+    int e = exps[i][var_idx];
+    if (e == 0)
+      continue;
+    auto new_exp = exps[i];
+    new_exp[var_idx] -= 1;
+    result_exps.push_back(std::move(new_exp));
+    result_coeffs.push_back(coeffs[i] * T(e));
+  }
+
+  if (result_exps.empty())
+    return Polynomial<T>(T(0));
+
+  return Polynomial<T>(std::move(result_coeffs), std::move(result_exps), vars, true);
+}
+
+} // namespace hc

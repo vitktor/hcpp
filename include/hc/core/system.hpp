@@ -28,4 +28,5 @@ private:
   std::vector<Polynomial<T>> polys;
   std::vector<Variable> vars;
 };
+
 } // namespace hc
