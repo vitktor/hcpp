@@ -35,4 +35,17 @@ Polynomial<T> differentiate(const Polynomial<T>& poly, const Variable& var)
   return Polynomial<T>(std::move(result_coeffs), std::move(result_exps), vars, true);
 }
 
+template <typename T>
+std::vector<std::vector<Polynomial<T>>> jacobian(
+    const std::vector<Polynomial<T>>& polys,
+    const std::vector<Variable>& vars)
+{
+  std::vector<std::vector<Polynomial<T>>> J(
+      polys.size(), std::vector<Polynomial<T>>(vars.size(), Polynomial<T>(T(0))));
+  for (size_t i = 0; i < polys.size(); ++i)
+    for (size_t j = 0; j < vars.size(); ++j)
+      J[i][j] = differentiate(polys[i], vars[j]);
+  return J;
+}
+
 } // namespace hc
