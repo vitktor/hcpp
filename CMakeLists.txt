@@ -31,3 +31,7 @@ add_executable(tests tests/variable.cpp tests/polynomial.cpp tests/system.cpp te
 target_link_libraries(tests PRIVATE hc GTest::gtest_main)
 include(GoogleTest)
 gtest_discover_tests(tests)
+
+find_package(benchmark REQUIRED)
+add_executable(benchmarks benchmarks/differentiation.cpp)
+target_link_libraries(benchmarks PRIVATE hc benchmark::benchmark)
