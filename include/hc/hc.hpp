@@ -3,7 +3,6 @@
 #include "core/types.hpp"
 #include "core/polynomial.hpp"
 #include "core/system.hpp"
-#include "core/differentiation.hpp"
 #include "evaluation/evaluator.hpp"
 #include "evaluation/instruction_evaluator.hpp"
 #include "homotopy/homotopy.hpp"

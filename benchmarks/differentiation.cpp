@@ -1,5 +1,6 @@
 #include <benchmark/benchmark.h>
 #include <hc/core/differentiation.hpp>
+#include <hc/core/system.hpp>
 
 using namespace hc;
 
@@ -25,10 +26,8 @@ static void Jacobian2x2(benchmark::State& state) {
     Variable x("x"), y("y");
     Polynomial<double> f1({1.0, 1.0, -1.0}, {{2, 0}, {0, 2}, {0, 0}}, {x, y});
     Polynomial<double> f2({1.0, -1.0}, {{1, 0}, {0, 1}}, {x, y});
-    std::vector<Polynomial<double>> polys({f1, f2});
-    std::vector<Variable> vars({x, y});
     for (auto _ : state) {
-        benchmark::DoNotOptimize(jacobian(polys, vars));
+        benchmark::DoNotOptimize(System<double>({f1, f2}, {x, y}));
     }
 }
 BENCHMARK(Jacobian2x2);
