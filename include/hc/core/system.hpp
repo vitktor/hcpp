@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 
-#include <hc/core/differentiation.hpp>
+#include <hc/core/calculus.hpp>
 #include <hc/core/polynomial.hpp>
 
 namespace hc

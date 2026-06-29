@@ -48,3 +48,43 @@ TEST(System, InferredVarsDisjoint) {
   EXPECT_EQ(s.getPolynomials()[0].degree(x), 2);
   EXPECT_EQ(s.getPolynomials()[1].degree(y), 3);
 }
+
+TEST(Jacobian, CircleAndLine) {
+  // F = { x^2 + y^2 - 1, x - y }
+  // J = | 2x   2y |
+  //     | 1    -1  |
+  Variable x("x"), y("y");
+  Polynomial<double> f1({1.0, 1.0, -1.0}, {{2, 0}, {0, 2}, {0, 0}}, {x, y});
+  Polynomial<double> f2({1.0, -1.0}, {{1, 0}, {0, 1}}, {x, y});
+  System<double> sys({f1, f2}, {x, y});
+  const auto& J = sys.getJacobian();
+  EXPECT_EQ(J.size(), 2u);
+  EXPECT_EQ(J[0].size(), 2u);
+  // J[0][0] = d/dx(x^2 + y^2 - 1) = 2x
+  EXPECT_EQ(J[0][0].getCoefficients(), (std::vector<double>{2.0}));
+  EXPECT_EQ(J[0][0].degree(x), 1);
+  // J[0][1] = d/dy(x^2 + y^2 - 1) = 2y
+  EXPECT_EQ(J[0][1].getCoefficients(), (std::vector<double>{2.0}));
+  EXPECT_EQ(J[0][1].degree(y), 1);
+  // J[1][0] = d/dx(x - y) = 1
+  EXPECT_EQ(J[1][0].getCoefficients(), (std::vector<double>{1.0}));
+  EXPECT_EQ(J[1][0].degree(), 0);
+  // J[1][1] = d/dy(x - y) = -1
+  EXPECT_EQ(J[1][1].getCoefficients(), (std::vector<double>{-1.0}));
+  EXPECT_EQ(J[1][1].degree(), 0);
+}
+
+TEST(Jacobian, TotalDegree2x2) {
+  // F = { x^2 - 1, y^2 - 1 }
+  // J = | 2x  0  |
+  //     | 0   2y |
+  Variable x("x"), y("y");
+  Polynomial<double> f1({1.0, -1.0}, {{2, 0}, {0, 0}}, {x, y});
+  Polynomial<double> f2({1.0, -1.0}, {{0, 2}, {0, 0}}, {x, y});
+  System<double> sys({f1, f2}, {x, y});
+  const auto& J = sys.getJacobian();
+  EXPECT_EQ(J[0][0].degree(x), 1);
+  EXPECT_EQ(J[0][1].degree(), 0);  // zero
+  EXPECT_EQ(J[1][0].degree(), 0);  // zero
+  EXPECT_EQ(J[1][1].degree(y), 1);
+}

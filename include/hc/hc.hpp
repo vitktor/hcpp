@@ -2,6 +2,7 @@
 
 #include "core/types.hpp"
 #include "core/polynomial.hpp"
+#include "core/calculus.hpp"
 #include "core/system.hpp"
 #include "evaluation/evaluator.hpp"
 #include "evaluation/instruction_evaluator.hpp"

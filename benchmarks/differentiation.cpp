@@ -1,5 +1,5 @@
 #include <benchmark/benchmark.h>
-#include <hc/core/differentiation.hpp>
+#include <hc/core/calculus.hpp>
 #include <hc/core/system.hpp>
 
 using namespace hc;

@@ -35,4 +35,22 @@ Polynomial<T> differentiate(const Polynomial<T>& poly, const Variable& var)
   return Polynomial<T>(std::move(result_coeffs), std::move(result_exps), vars, true);
 }
 
+template <typename T, typename S>
+std::common_type_t<T, S> evaluate(const Polynomial<T>& poly, const std::vector<S>& point)
+{
+  using R = std::common_type_t<T, S>;
+  const auto& exps = poly.getExponents();
+  const auto& coeffs = poly.getCoefficients();
+
+  R result = R(0);
+  for (size_t i = 0; i < coeffs.size(); ++i) {
+    R term = static_cast<R>(coeffs[i]);
+    for (size_t j = 0; j < point.size(); ++j)
+      for (int k = 0; k < exps[i][j]; ++k)
+        term *= point[j];
+    result += term;
+  }
+  return result;
+}
+
 } // namespace hc

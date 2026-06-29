@@ -12,7 +12,6 @@ add_library(hc
     src/variable.cpp
     src/polynomial.cpp
     src/system.cpp
-    src/differentiation.cpp
     src/tracker.cpp
     src/corrector.cpp
     src/runge_kutta.cpp
@@ -27,7 +26,7 @@ add_library(hc
 target_include_directories(hc PUBLIC include)
 target_link_libraries(hc PUBLIC Eigen3::Eigen)
 
-add_executable(tests tests/variable.cpp tests/polynomial.cpp tests/system.cpp tests/differentiation.cpp)
+add_executable(tests tests/variable.cpp tests/polynomial.cpp tests/system.cpp tests/calculus.cpp)
 target_link_libraries(tests PRIVATE hc GTest::gtest_main)
 include(GoogleTest)
 gtest_discover_tests(tests)

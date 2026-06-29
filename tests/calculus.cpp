@@ -1,8 +1,9 @@
 #include <gtest/gtest.h>
-#include <hc/core/differentiation.hpp>
-#include <hc/core/system.hpp>
+#include <hc/core/calculus.hpp>
 
 using namespace hc;
+
+// ---- differentiate ----
 
 TEST(Differentiate, Constant) {
   // d/dx (5) = 0
@@ -59,42 +60,40 @@ TEST(Differentiate, MultipleVariablesWrtY) {
   EXPECT_EQ(dy.degree(y), 1);
 }
 
-TEST(Jacobian, CircleAndLine) {
-  // F = { x^2 + y^2 - 1, x - y }
-  // J = | 2x   2y |
-  //     | 1    -1  |
-  Variable x("x"), y("y");
-  Polynomial<double> f1({1.0, 1.0, -1.0}, {{2, 0}, {0, 2}, {0, 0}}, {x, y});
-  Polynomial<double> f2({1.0, -1.0}, {{1, 0}, {0, 1}}, {x, y});
-  System<double> sys({f1, f2}, {x, y});
-  const auto& J = sys.getJacobian();
-  EXPECT_EQ(J.size(), 2u);
-  EXPECT_EQ(J[0].size(), 2u);
-  // J[0][0] = d/dx(x^2 + y^2 - 1) = 2x
-  EXPECT_EQ(J[0][0].getCoefficients(), (std::vector<double>{2.0}));
-  EXPECT_EQ(J[0][0].degree(x), 1);
-  // J[0][1] = d/dy(x^2 + y^2 - 1) = 2y
-  EXPECT_EQ(J[0][1].getCoefficients(), (std::vector<double>{2.0}));
-  EXPECT_EQ(J[0][1].degree(y), 1);
-  // J[1][0] = d/dx(x - y) = 1
-  EXPECT_EQ(J[1][0].getCoefficients(), (std::vector<double>{1.0}));
-  EXPECT_EQ(J[1][0].degree(), 0);
-  // J[1][1] = d/dy(x - y) = -1
-  EXPECT_EQ(J[1][1].getCoefficients(), (std::vector<double>{-1.0}));
-  EXPECT_EQ(J[1][1].degree(), 0);
+// ---- evaluate ----
+
+TEST(Evaluate, Constant) {
+  // p = 5, evaluate at x=2 -> 5
+  Variable x("x");
+  Polynomial<double> p(5.0);
+  EXPECT_DOUBLE_EQ(evaluate(p, std::vector<double>{}), 5.0);
 }
 
-TEST(Jacobian, TotalDegree2x2) {
-  // F = { x^2 - 1, y^2 - 1 }
-  // J = | 2x  0  |
-  //     | 0   2y |
-  Variable x("x"), y("y");
-  Polynomial<double> f1({1.0, -1.0}, {{2, 0}, {0, 0}}, {x, y});
-  Polynomial<double> f2({1.0, -1.0}, {{0, 2}, {0, 0}}, {x, y});
-  System<double> sys({f1, f2}, {x, y});
-  const auto& J = sys.getJacobian();
-  EXPECT_EQ(J[0][0].degree(x), 1);
-  EXPECT_EQ(J[0][1].degree(), 0);  // zero
-  EXPECT_EQ(J[1][0].degree(), 0);  // zero
-  EXPECT_EQ(J[1][1].degree(y), 1);
+TEST(Evaluate, Linear) {
+  // p = x + 1, evaluate at x=3 -> 4
+  Variable x("x");
+  Polynomial<double> p({1.0, 1.0}, {{1}, {0}}, {x});
+  EXPECT_DOUBLE_EQ(evaluate(p, std::vector<double>{3.0}), 4.0);
 }
+
+TEST(Evaluate, Quadratic) {
+  // p = x^2, evaluate at x=3 -> 9
+  Variable x("x");
+  Polynomial<double> p({1.0}, {{2}}, {x});
+  EXPECT_DOUBLE_EQ(evaluate(p, std::vector<double>{3.0}), 9.0);
+}
+
+TEST(Evaluate, MultiVariable) {
+  // p = x^2 + x*y + y^2, evaluate at (1, 2) -> 1 + 2 + 4 = 7
+  Variable x("x"), y("y");
+  Polynomial<double> p({1.0, 1.0, 1.0}, {{2, 0}, {1, 1}, {0, 2}}, {x, y});
+  EXPECT_DOUBLE_EQ(evaluate(p, std::vector<double>{1.0, 2.0}), 7.0);
+}
+
+TEST(Evaluate, NegativeCoefficients) {
+  // p = x^2 - 1, evaluate at x=1 -> 0
+  Variable x("x");
+  Polynomial<double> p({1.0, -1.0}, {{2}, {0}}, {x});
+  EXPECT_DOUBLE_EQ(evaluate(p, std::vector<double>{1.0}), 0.0);
+}
+
