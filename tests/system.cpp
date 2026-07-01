@@ -62,15 +62,19 @@ TEST(Jacobian, CircleAndLine) {
   EXPECT_EQ(J[0].size(), 2u);
   // J[0][0] = d/dx(x^2 + y^2 - 1) = 2x
   EXPECT_EQ(J[0][0].getCoefficients(), (std::vector<double>{2.0}));
+  EXPECT_EQ(J[0][0].getExponents(), (std::vector<std::vector<int>>{{1, 0}}));
   EXPECT_EQ(J[0][0].degree(x), 1);
   // J[0][1] = d/dy(x^2 + y^2 - 1) = 2y
   EXPECT_EQ(J[0][1].getCoefficients(), (std::vector<double>{2.0}));
+  EXPECT_EQ(J[0][1].getExponents(), (std::vector<std::vector<int>>{{0, 1}}));
   EXPECT_EQ(J[0][1].degree(y), 1);
   // J[1][0] = d/dx(x - y) = 1
   EXPECT_EQ(J[1][0].getCoefficients(), (std::vector<double>{1.0}));
+  EXPECT_EQ(J[1][0].getExponents(), (std::vector<std::vector<int>>{{0, 0}}));
   EXPECT_EQ(J[1][0].degree(), 0);
   // J[1][1] = d/dy(x - y) = -1
   EXPECT_EQ(J[1][1].getCoefficients(), (std::vector<double>{-1.0}));
+  EXPECT_EQ(J[1][1].getExponents(), (std::vector<std::vector<int>>{{0, 0}}));
   EXPECT_EQ(J[1][1].degree(), 0);
 }
 
@@ -83,8 +87,20 @@ TEST(Jacobian, TotalDegree2x2) {
   Polynomial<double> f2({1.0, -1.0}, {{0, 2}, {0, 0}}, {x, y});
   System<double> sys({f1, f2}, {x, y});
   const auto& J = sys.getJacobian();
+  EXPECT_EQ(J[0][0].getCoefficients(), (std::vector<double>{2.0}));
+  EXPECT_EQ(J[0][0].getExponents(), (std::vector<std::vector<int>>{{1, 0}}));
   EXPECT_EQ(J[0][0].degree(x), 1);
-  EXPECT_EQ(J[0][1].degree(), 0);  // zero
-  EXPECT_EQ(J[1][0].degree(), 0);  // zero
+  // J[0][1], J[1][0] are the zero polynomial: no terms, but the ambient
+  // variables {x, y} are preserved so they remain safely evaluable.
+  EXPECT_EQ(J[0][1].getCoefficients(), (std::vector<double>{}));
+  EXPECT_EQ(J[0][1].getExponents(), (std::vector<std::vector<int>>{}));
+  EXPECT_EQ(J[0][1].getVariables(), (std::vector<Variable>{x, y}));
+  EXPECT_EQ(J[0][1].degree(), -1);
+  EXPECT_EQ(J[1][0].getCoefficients(), (std::vector<double>{}));
+  EXPECT_EQ(J[1][0].getExponents(), (std::vector<std::vector<int>>{}));
+  EXPECT_EQ(J[1][0].getVariables(), (std::vector<Variable>{x, y}));
+  EXPECT_EQ(J[1][0].degree(), -1);
+  EXPECT_EQ(J[1][1].getCoefficients(), (std::vector<double>{2.0}));
+  EXPECT_EQ(J[1][1].getExponents(), (std::vector<std::vector<int>>{{0, 1}}));
   EXPECT_EQ(J[1][1].degree(y), 1);
 }

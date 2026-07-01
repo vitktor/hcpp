@@ -20,7 +20,7 @@ Polynomial<double> operator+(const Variable& lv, const Variable& rv)
 Polynomial<double> operator-(const Variable& lv, const Variable& rv)
 {
   if (lv == rv)
-    return Polynomial<double>(0.0);
+    return Polynomial<double>({}, {}, {lv});
   else if (lv < rv)
     return Polynomial<double>({1.0, -1.0}, {{1, 0}, {0, 1}}, {lv, rv});
   else

@@ -146,9 +146,6 @@ public:
       result_coeffs.push_back(poly.coeffs[j++]);
     }
 
-    if (result_exps.empty())
-      return Polynomial<T>(0);
-
     constexpr bool sorted_terms = true;
     return Polynomial<T>(std::move(result_coeffs), std::move(result_exps),
                          std::move(mvars.vars), sorted_terms);
@@ -220,9 +217,6 @@ public:
       result_exps.pop_back();
       result_coeffs.pop_back();
     }
-
-    if (result_exps.empty())
-      return Polynomial<T>(T(0));
 
     return Polynomial<T>(std::move(result_coeffs), std::move(result_exps),
                          std::move(mvars.vars), true);

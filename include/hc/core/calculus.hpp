@@ -1,4 +1,7 @@
 #pragma once
+#include <cmath>
+#include <complex>
+
 #include <hc/core/polynomial.hpp>
 
 namespace hc
@@ -10,7 +13,7 @@ Polynomial<T> differentiate(const Polynomial<T>& poly, const Variable& var)
   const auto& vars = poly.getVariables();
   auto it = std::find(vars.begin(), vars.end(), var);
   if (it == vars.end())
-    return Polynomial<T>(T(0));
+    return Polynomial<T>({}, {}, vars, true);
 
   int var_idx = it - vars.begin();
   const auto& exps = poly.getExponents();
@@ -30,7 +33,7 @@ Polynomial<T> differentiate(const Polynomial<T>& poly, const Variable& var)
   }
 
   if (result_exps.empty())
-    return Polynomial<T>(T(0));
+    return Polynomial<T>({}, {}, vars, true);
 
   return Polynomial<T>(std::move(result_coeffs), std::move(result_exps), vars, true);
 }
@@ -46,8 +49,7 @@ std::common_type_t<T, S> evaluate(const Polynomial<T>& poly, const std::vector<S
   for (size_t i = 0; i < coeffs.size(); ++i) {
     R term = static_cast<R>(coeffs[i]);
     for (size_t j = 0; j < point.size(); ++j)
-      for (int k = 0; k < exps[i][j]; ++k)
-        term *= point[j];
+      term *= std::pow(point[j], exps[i][j]);
     result += term;
   }
   return result;
