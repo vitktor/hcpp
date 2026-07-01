@@ -26,7 +26,7 @@ add_library(hc
 target_include_directories(hc PUBLIC include)
 target_link_libraries(hc PUBLIC Eigen3::Eigen)
 
-add_executable(tests tests/variable.cpp tests/polynomial.cpp tests/system.cpp tests/calculus.cpp tests/straight_line.cpp)
+add_executable(tests tests/variable.cpp tests/polynomial.cpp tests/system.cpp tests/calculus.cpp tests/straight_line.cpp tests/corrector.cpp tests/runge_kutta.cpp tests/step_control.cpp tests/tracker.cpp)
 target_link_libraries(tests PRIVATE hc GTest::gtest_main)
 include(GoogleTest)
 gtest_discover_tests(tests)
