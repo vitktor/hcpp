@@ -10,8 +10,8 @@ TEST(EulerPredictor, LinearHomotopyExactStep) {
   // G = x - 2, F = x - 5; H(x,t) = x - (2 + 3t), root(t) = 2 + 3t is linear in t,
   // so dx/dt = 3 everywhere and a single Euler step from t=1 to t=0 is exact.
   Variable x("x");
-  System<double> start({Polynomial<double>({1.0, -2.0}, {{1}, {0}}, {x})}, {x});
-  System<double> target({Polynomial<double>({1.0, -5.0}, {{1}, {0}}, {x})}, {x});
+  System<double> start({x - 2.0}, {x});
+  System<double> target({x - 5.0}, {x});
   StraightLineHomotopy<double> H(start, target);
 
   EulerPredictor<double> predictor;
@@ -28,8 +28,8 @@ TEST(EulerPredictor, PredictCorrectTracksNonlinearPath) {
   // H(x,t) = x^2 - (4 + 5t); root(t) = sqrt(4+5t) is nonlinear in t, so a single
   // large Euler step would overshoot -- track in small predict+correct steps instead.
   Variable x("x");
-  System<double> start({Polynomial<double>({1.0, -4.0}, {{2}, {0}}, {x})}, {x});
-  System<double> target({Polynomial<double>({1.0, -9.0}, {{2}, {0}}, {x})}, {x});
+  System<double> start({pow(x, 2) - 4.0}, {x});
+  System<double> target({pow(x, 2) - 9.0}, {x});
   StraightLineHomotopy<double> H(start, target);
 
   EulerPredictor<double> predictor;

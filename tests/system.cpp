@@ -5,7 +5,7 @@ using namespace hc;
 
 TEST(System, ExplicitVars) {
   Variable x("x"), y("y");
-  Polynomial<double> p({1.0, 1.0}, {{1, 0}, {0, 1}}, {x, y});
+  auto p = x + y;
   System<double> s({p}, {x, y});
   EXPECT_EQ(s.getVariables(), (std::vector<Variable>{x, y}));
   EXPECT_EQ(s.getPolynomials().size(), 1u);
@@ -14,7 +14,7 @@ TEST(System, ExplicitVars) {
 TEST(System, InferredVarsSinglePoly) {
   // x^3 - 2*x*y + y^2 - 1
   Variable x("x"), y("y");
-  Polynomial<double> p({1.0, -2.0, 1.0, -1.0}, {{3, 0}, {1, 1}, {0, 2}, {0, 0}}, {x, y});
+  auto p = pow(x, 3) - 2.0*x*y + pow(y, 2) - 1.0;
   System<double> s({p});
   EXPECT_EQ(s.getVariables(), (std::vector<Variable>{x, y}));
   EXPECT_EQ(s.getPolynomials()[0].degree(), 3);
@@ -27,8 +27,8 @@ TEST(System, InferredVarsOverlapping) {
   // p2: y^2 + y*z + z  (uses {y, z})
   // merged vars: {x, y, z}
   Variable x("x"), y("y"), z("z");
-  Polynomial<double> p1({1.0, 1.0, -1.0}, {{2, 0}, {1, 1}, {0, 0}}, {x, y});
-  Polynomial<double> p2({1.0, 1.0, 1.0}, {{2, 0}, {1, 1}, {0, 1}}, {y, z});
+  auto p1 = pow(x, 2) + x*y - 1.0;
+  auto p2 = pow(y, 2) + y*z + z;
   System<double> s({p1, p2});
   EXPECT_EQ(s.getVariables(), (std::vector<Variable>{x, y, z}));
   EXPECT_EQ(s.getPolynomials().size(), 2u);
@@ -41,8 +41,8 @@ TEST(System, InferredVarsDisjoint) {
   // p2: y^3 + y  (uses {y})
   // merged vars: {x, y}
   Variable x("x"), y("y");
-  Polynomial<double> p1({1.0, -1.0}, {{2}, {0}}, {x});
-  Polynomial<double> p2({1.0, 1.0}, {{3}, {1}}, {y});
+  auto p1 = pow(x, 2) - 1.0;
+  auto p2 = pow(y, 3) + y;
   System<double> s({p1, p2});
   EXPECT_EQ(s.getVariables(), (std::vector<Variable>{x, y}));
   EXPECT_EQ(s.getPolynomials()[0].degree(x), 2);
@@ -54,8 +54,8 @@ TEST(Jacobian, CircleAndLine) {
   // J = | 2x   2y |
   //     | 1    -1  |
   Variable x("x"), y("y");
-  Polynomial<double> f1({1.0, 1.0, -1.0}, {{2, 0}, {0, 2}, {0, 0}}, {x, y});
-  Polynomial<double> f2({1.0, -1.0}, {{1, 0}, {0, 1}}, {x, y});
+  auto f1 = pow(x, 2) + pow(y, 2) - 1.0;
+  auto f2 = x - y;
   System<double> sys({f1, f2}, {x, y});
   const auto& J = sys.getJacobian();
   EXPECT_EQ(J.size(), 2u);
@@ -82,9 +82,13 @@ TEST(Jacobian, TotalDegree2x2) {
   // F = { x^2 - 1, y^2 - 1 }
   // J = | 2x  0  |
   //     | 0   2y |
+  // f1, f2 each only naturally involve one variable; System's constructor
+  // extends each polynomial's own variable list to the full System (via
+  // update_vars) before computing the Jacobian, so entries like J[0][1]
+  // below stay safely evaluable even though they differentiate to zero.
   Variable x("x"), y("y");
-  Polynomial<double> f1({1.0, -1.0}, {{2, 0}, {0, 0}}, {x, y});
-  Polynomial<double> f2({1.0, -1.0}, {{0, 2}, {0, 0}}, {x, y});
+  auto f1 = pow(x, 2) - 1.0;
+  auto f2 = pow(y, 2) - 1.0;
   System<double> sys({f1, f2}, {x, y});
   const auto& J = sys.getJacobian();
   EXPECT_EQ(J[0][0].getCoefficients(), (std::vector<double>{2.0}));

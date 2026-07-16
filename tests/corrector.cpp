@@ -10,7 +10,7 @@ using cd = std::complex<double>;
 TEST(NewtonCorrector, UnivariatePositiveRoot) {
   // F = x^2 - 1; start == target so H(x,t) = F(x) for every t
   Variable x("x");
-  Polynomial<double> f({1.0, -1.0}, {{2}, {0}}, {x});
+  auto f = pow(x, 2) - 1.0;
   System<double> sys({f}, {x});
   StraightLineHomotopy<double> H(sys, sys);
 
@@ -26,7 +26,7 @@ TEST(NewtonCorrector, UnivariatePositiveRoot) {
 TEST(NewtonCorrector, UnivariateNegativeRoot) {
   // Starting closer to -1 should converge to the other root
   Variable x("x");
-  Polynomial<double> f({1.0, -1.0}, {{2}, {0}}, {x});
+  auto f = pow(x, 2) - 1.0;
   System<double> sys({f}, {x});
   StraightLineHomotopy<double> H(sys, sys);
 
@@ -41,8 +41,8 @@ TEST(NewtonCorrector, UnivariateNegativeRoot) {
 TEST(NewtonCorrector, CircleAndLine) {
   // F = { x^2 + y^2 - 1, x - y }; solution x=y=1/sqrt(2)
   Variable x("x"), y("y");
-  Polynomial<double> f1({1.0, 1.0, -1.0}, {{2, 0}, {0, 2}, {0, 0}}, {x, y});
-  Polynomial<double> f2({1.0, -1.0}, {{1, 0}, {0, 1}}, {x, y});
+  auto f1 = pow(x, 2) + pow(y, 2) - 1.0;
+  auto f2 = x - y;
   System<double> sys({f1, f2}, {x, y});
   StraightLineHomotopy<double> H(sys, sys);
 
@@ -59,7 +59,7 @@ TEST(NewtonCorrector, CircleAndLine) {
 TEST(NewtonCorrector, AlreadyConverged) {
   // Starting exactly at the root should converge in 0 iterations
   Variable x("x");
-  Polynomial<double> f({1.0, -1.0}, {{2}, {0}}, {x});
+  auto f = pow(x, 2) - 1.0;
   System<double> sys({f}, {x});
   StraightLineHomotopy<double> H(sys, sys);
 

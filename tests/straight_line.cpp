@@ -8,8 +8,8 @@ TEST(StraightLineHomotopy, Univariate) {
   // G = x - 2 (root 2), F = x - 5 (root 5)
   // H(x,t) = x - (2 + 3t)
   Variable x("x");
-  System<double> start({Polynomial<double>({1.0, -2.0}, {{1}, {0}}, {x})}, {x});
-  System<double> target({Polynomial<double>({1.0, -5.0}, {{1}, {0}}, {x})}, {x});
+  System<double> start({x - 2.0}, {x});
+  System<double> target({x - 5.0}, {x});
   StraightLineHomotopy<double> H(start, target);
 
   std::vector<cd> point{cd(2.0, 0.0)};
@@ -25,10 +25,10 @@ TEST(StraightLineHomotopy, Univariate) {
 TEST(StraightLineHomotopy, EvaluateWithJacobianAtStart) {
   // G = {x^2 - 1, y^2 - 1}, F = {x^2 + y^2 - 1, x - y}
   Variable x("x"), y("y");
-  Polynomial<double> g1({1.0, -1.0}, {{2, 0}, {0, 0}}, {x, y});
-  Polynomial<double> g2({1.0, -1.0}, {{0, 2}, {0, 0}}, {x, y});
-  Polynomial<double> f1({1.0, 1.0, -1.0}, {{2, 0}, {0, 2}, {0, 0}}, {x, y});
-  Polynomial<double> f2({1.0, -1.0}, {{1, 0}, {0, 1}}, {x, y});
+  auto g1 = pow(x, 2) - 1.0;
+  auto g2 = pow(y, 2) - 1.0;
+  auto f1 = pow(x, 2) + pow(y, 2) - 1.0;
+  auto f2 = x - y;
   System<double> start({g1, g2}, {x, y});
   System<double> target({f1, f2}, {x, y});
   StraightLineHomotopy<double> H(start, target);
@@ -56,10 +56,10 @@ TEST(StraightLineHomotopy, EvaluateWithJacobianAtStart) {
 
 TEST(StraightLineHomotopy, EvaluateWithJacobianAtTarget) {
   Variable x("x"), y("y");
-  Polynomial<double> g1({1.0, -1.0}, {{2, 0}, {0, 0}}, {x, y});
-  Polynomial<double> g2({1.0, -1.0}, {{0, 2}, {0, 0}}, {x, y});
-  Polynomial<double> f1({1.0, 1.0, -1.0}, {{2, 0}, {0, 2}, {0, 0}}, {x, y});
-  Polynomial<double> f2({1.0, -1.0}, {{1, 0}, {0, 1}}, {x, y});
+  auto g1 = pow(x, 2) - 1.0;
+  auto g2 = pow(y, 2) - 1.0;
+  auto f1 = pow(x, 2) + pow(y, 2) - 1.0;
+  auto f2 = x - y;
   System<double> start({g1, g2}, {x, y});
   System<double> target({f1, f2}, {x, y});
   StraightLineHomotopy<double> H(start, target);

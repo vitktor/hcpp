@@ -12,16 +12,18 @@ TEST(Polynomial, Constructor) {
 
 TEST(Polynomial, Degree) {
   // x^2 + y^3: monomial 0 = x^2 (exps {2,0}), monomial 1 = y^3 (exps {0,3})
-  Polynomial<double> p({1.0, 1.0}, {{2, 0}, {0, 3}}, {Variable("x"), Variable("y")});
+  Variable x("x"), y("y");
+  auto p = pow(x, 2) + pow(y, 3);
   EXPECT_EQ(p.degree(), 3);
 }
 
 TEST(Polynomial, DegreeOfVariable) {
   // x^2 + y^3
-  Polynomial<double> p({1.0, 1.0}, {{2, 0}, {0, 3}}, {Variable("x"), Variable("y")});
-  EXPECT_EQ(p.degree(Variable("x")), 2);
-  EXPECT_EQ(p.degree(Variable("y")), 3);
-  EXPECT_EQ(p.degree(Variable("z")), 0);
+  Variable x("x"), y("y"), z("z");
+  auto p = pow(x, 2) + pow(y, 3);
+  EXPECT_EQ(p.degree(x), 2);
+  EXPECT_EQ(p.degree(y), 3);
+  EXPECT_EQ(p.degree(z), 0);
 }
 
 TEST(VariableAddition, SameVariable) {
@@ -161,7 +163,7 @@ TEST(VariablePow, HigherExponent) {
 TEST(PolynomialNegation, Simple) {
   // -(x^2 + 2y) = -x^2 - 2y; decreasing lex puts x^2 before y
   Variable x("x"), y("y");
-  Polynomial<double> p({1.0, 2.0}, {{2, 0}, {0, 1}}, {x, y});
+  auto p = pow(x, 2) + 2.0*y;
   auto result = -p;
   EXPECT_EQ(result.getCoefficients(), (std::vector<double>{-1.0, -2.0}));
   EXPECT_EQ(result.getExponents(), (std::vector<std::vector<int>>{{2, 0}, {0, 1}}));
@@ -171,8 +173,8 @@ TEST(PolynomialNegation, Simple) {
 TEST(PolynomialAddition, SameTerms) {
   // 2x + 3x = 5x
   Variable x("x");
-  Polynomial<double> p1({2.0}, {{1}}, {x});
-  Polynomial<double> p2({3.0}, {{1}}, {x});
+  Polynomial<double> p1 = 2.0 * x;
+  Polynomial<double> p2 = 3.0 * x;
   auto result = p1 + p2;
   EXPECT_EQ(result.getCoefficients(), (std::vector<double>{5.0}));
   EXPECT_EQ(result.getExponents(), (std::vector<std::vector<int>>{{1}}));
@@ -182,8 +184,8 @@ TEST(PolynomialAddition, SameTerms) {
 TEST(PolynomialAddition, CancellingTerms) {
   // x + (-x) = 0; zero terms, but the ambient variable x is preserved
   Variable x("x");
-  Polynomial<double> p1({1.0}, {{1}}, {x});
-  Polynomial<double> p2({-1.0}, {{1}}, {x});
+  Polynomial<double> p1 = x;
+  Polynomial<double> p2 = -x;
   auto result = p1 + p2;
   EXPECT_EQ(result.getCoefficients(), (std::vector<double>{}));
   EXPECT_EQ(result.getExponents(), (std::vector<std::vector<int>>{}));
@@ -193,8 +195,8 @@ TEST(PolynomialAddition, CancellingTerms) {
 TEST(PolynomialAddition, DifferentVariables) {
   // x + y: degree 1 in both
   Variable x("x"), y("y");
-  Polynomial<double> p1({1.0}, {{1}}, {x});
-  Polynomial<double> p2({1.0}, {{1}}, {y});
+  Polynomial<double> p1 = x;
+  Polynomial<double> p2 = y;
   auto result = p1 + p2;
   EXPECT_EQ(result.getCoefficients(), (std::vector<double>{1.0, 1.0}));
   EXPECT_EQ(result.getExponents(), (std::vector<std::vector<int>>{{1, 0}, {0, 1}}));
@@ -206,8 +208,8 @@ TEST(PolynomialAddition, DifferentVariables) {
 TEST(PolynomialAddition, MergedVariables) {
   // (x + y) + (y + z) = x + 2y + z
   Variable x("x"), y("y"), z("z");
-  Polynomial<double> p1({1.0, 1.0}, {{1, 0}, {0, 1}}, {x, y});
-  Polynomial<double> p2({1.0, 1.0}, {{1, 0}, {0, 1}}, {y, z});
+  auto p1 = x + y;
+  auto p2 = y + z;
   auto result = p1 + p2;
   EXPECT_EQ(result.getCoefficients(), (std::vector<double>{1.0, 2.0, 1.0}));
   EXPECT_EQ(result.getExponents(),
@@ -221,8 +223,8 @@ TEST(PolynomialAddition, MergedVariables) {
 TEST(PolynomialMultiplication, SameVariable) {
   // x * x = x^2
   Variable x("x");
-  Polynomial<double> p1({1.0}, {{1}}, {x});
-  Polynomial<double> p2({1.0}, {{1}}, {x});
+  Polynomial<double> p1 = x;
+  Polynomial<double> p2 = x;
   auto result = p1 * p2;
   EXPECT_EQ(result.getCoefficients(), (std::vector<double>{1.0}));
   EXPECT_EQ(result.getExponents(), (std::vector<std::vector<int>>{{2}}));
@@ -233,8 +235,8 @@ TEST(PolynomialMultiplication, SameVariable) {
 TEST(PolynomialMultiplication, DifferentVariables) {
   // (2x) * (3y) = 6xy
   Variable x("x"), y("y");
-  Polynomial<double> p1({2.0}, {{1, 0}}, {x, y});
-  Polynomial<double> p2({3.0}, {{0, 1}}, {x, y});
+  Polynomial<double> p1 = 2.0 * x;
+  Polynomial<double> p2 = 3.0 * y;
   auto result = p1 * p2;
   EXPECT_EQ(result.getCoefficients(), (std::vector<double>{6.0}));
   EXPECT_EQ(result.getExponents(), (std::vector<std::vector<int>>{{1, 1}}));
@@ -246,8 +248,8 @@ TEST(PolynomialMultiplication, DifferentVariables) {
 TEST(PolynomialMultiplication, LikeTerms) {
   // (x + y) * (x - y) = x^2 - y^2
   Variable x("x"), y("y");
-  Polynomial<double> p1({1.0, 1.0}, {{1, 0}, {0, 1}}, {x, y});
-  Polynomial<double> p2({1.0, -1.0}, {{1, 0}, {0, 1}}, {x, y});
+  auto p1 = x + y;
+  auto p2 = x - y;
   auto result = p1 * p2;
   EXPECT_EQ(result.getVariables(), (std::vector<Variable>{x, y}));
   EXPECT_EQ(result.degree(x), 2);
@@ -261,8 +263,8 @@ TEST(PolynomialMultiplication, CancellingTerms) {
   // (x + y) * (x - y) middle terms cancel; x^2 - xy + xy - y^2 = x^2 - y^2
   // already tested above; verify no xy term
   Variable x("x"), y("y");
-  Polynomial<double> p1({1.0, 1.0}, {{1, 0}, {0, 1}}, {x, y});
-  Polynomial<double> p2({1.0, -1.0}, {{1, 0}, {0, 1}}, {x, y});
+  auto p1 = x + y;
+  auto p2 = x - y;
   auto result = p1 * p2;
   EXPECT_EQ(result.getCoefficients().size(), 2u);
   EXPECT_EQ(result.getExponents(), (std::vector<std::vector<int>>{{2, 0}, {0, 2}}));

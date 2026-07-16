@@ -13,8 +13,8 @@ TEST(Tracker, TracksNonlinearPathFromStartToTarget) {
   // F = x^2 - 9 (root 3, the target solution at t=1)
   // H(x,t) = x^2 - (4 + 5t); track t: 0 -> 1
   Variable x("x");
-  System<double> start({Polynomial<double>({1.0, -4.0}, {{2}, {0}}, {x})}, {x});
-  System<double> target({Polynomial<double>({1.0, -9.0}, {{2}, {0}}, {x})}, {x});
+  System<double> start({pow(x, 2) - 4.0}, {x});
+  System<double> target({pow(x, 2) - 9.0}, {x});
   StraightLineHomotopy<double> H(start, target);
   EulerPredictor<double> predictor;
 
@@ -34,10 +34,10 @@ TEST(Tracker, TracksCircleAndLineFromStartToTarget) {
   // G = { x^2 - 1, y^2 - 1 } (known start solution (1,1) at t=0)
   // F = { x^2 + y^2 - 1, x - y } (target solution (1/sqrt2, 1/sqrt2) at t=1)
   Variable x("x"), y("y");
-  Polynomial<double> g1({1.0, -1.0}, {{2, 0}, {0, 0}}, {x, y});
-  Polynomial<double> g2({1.0, -1.0}, {{0, 2}, {0, 0}}, {x, y});
-  Polynomial<double> f1({1.0, 1.0, -1.0}, {{2, 0}, {0, 2}, {0, 0}}, {x, y});
-  Polynomial<double> f2({1.0, -1.0}, {{1, 0}, {0, 1}}, {x, y});
+  auto g1 = pow(x, 2) - 1.0;
+  auto g2 = pow(y, 2) - 1.0;
+  auto f1 = pow(x, 2) + pow(y, 2) - 1.0;
+  auto f2 = x - y;
   System<double> start({g1, g2}, {x, y});
   System<double> target({f1, f2}, {x, y});
   StraightLineHomotopy<double> H(start, target);
@@ -59,10 +59,10 @@ TEST(Tracker, TracksDecoupled2x2PathFromStartToTarget) {
   // Decoupled (diagonal) system: each variable follows its own smooth
   // univariate path, same shape as the proven 1-variable case above.
   Variable x("x"), y("y");
-  Polynomial<double> g1({1.0, -4.0}, {{2, 0}, {0, 0}}, {x, y});
-  Polynomial<double> g2({1.0, -9.0}, {{0, 2}, {0, 0}}, {x, y});
-  Polynomial<double> f1({1.0, -9.0}, {{2, 0}, {0, 0}}, {x, y});
-  Polynomial<double> f2({1.0, -16.0}, {{0, 2}, {0, 0}}, {x, y});
+  auto g1 = pow(x, 2) - 4.0;
+  auto g2 = pow(y, 2) - 9.0;
+  auto f1 = pow(x, 2) - 9.0;
+  auto f2 = pow(y, 2) - 16.0;
   System<double> start({g1, g2}, {x, y});
   System<double> target({f1, f2}, {x, y});
   StraightLineHomotopy<double> H(start, target);
@@ -80,8 +80,8 @@ TEST(Tracker, TracksDecoupled2x2PathFromStartToTarget) {
 TEST(Tracker, FailsWhenStepBudgetExhausted) {
   // Same path as above, but capped at 1 step so it cannot possibly reach t=1
   Variable x("x");
-  System<double> start({Polynomial<double>({1.0, -4.0}, {{2}, {0}}, {x})}, {x});
-  System<double> target({Polynomial<double>({1.0, -9.0}, {{2}, {0}}, {x})}, {x});
+  System<double> start({pow(x, 2) - 4.0}, {x});
+  System<double> target({pow(x, 2) - 9.0}, {x});
   StraightLineHomotopy<double> H(start, target);
   EulerPredictor<double> predictor;
 
