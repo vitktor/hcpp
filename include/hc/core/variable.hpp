@@ -4,11 +4,17 @@
 #include <vector>
 
 namespace hc {
+template <typename T> class Polynomial;
+
 struct Variable {
   std::string name;
   Variable(std::string name) : name(std::move(name)) {}
   bool operator==(const Variable& other) const { return name == other.name; }
   bool operator<(const Variable& other) const { return name < other.name; }
+
+  // Lets a bare Variable participate in Polynomial<double> arithmetic
+  // (operators +,-,* below) without needing the raw Polynomial constructor.
+  operator Polynomial<double>() const;
 };
 
 struct MergedVars {

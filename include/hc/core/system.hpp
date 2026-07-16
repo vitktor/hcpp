@@ -10,8 +10,10 @@ template <typename T> class System
 {
 public:
   System(std::vector<Polynomial<T>> polys, std::vector<Variable> vars)
-      : polys(std::move(polys)), vars(std::move(vars)), jac(compute_jacobian())
+      : polys(std::move(polys)), vars(std::move(vars))
   {
+    this->polys = update_vars(std::move(this->polys), this->vars);
+    jac = compute_jacobian();
   }
 
   System(std::vector<Polynomial<T>> polys) : polys(std::move(polys))
@@ -20,6 +22,7 @@ public:
       vars.insert(vars.end(), p.getVariables().begin(), p.getVariables().end());
     std::sort(vars.begin(), vars.end());
     vars.erase(std::unique(vars.begin(), vars.end()), vars.end());
+    this->polys = update_vars(std::move(this->polys), vars);
     jac = compute_jacobian();
   }
 

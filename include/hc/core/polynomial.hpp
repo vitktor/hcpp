@@ -1,5 +1,6 @@
 #pragma once
 #include <algorithm>
+#include <stdexcept>
 #include <vector>
 
 #include <hc/core/variable.hpp>
@@ -222,6 +223,20 @@ public:
                          std::move(mvars.vars), true);
   }
 
+  Polynomial<T> update_vars(const std::vector<Variable>& new_vars) const
+  {
+    MergedVars mv = merge_sorted_vars(vars, new_vars);
+    if (mv.vars != new_vars)
+      throw std::invalid_argument(
+          "update_vars: new_vars must be a superset of the polynomial's variables");
+    size_t n_vars = mv.vars.size();
+    std::vector<std::vector<int>> new_exps;
+    new_exps.reserve(exps.size());
+    for (const auto& e : exps)
+      new_exps.push_back(map_exp(e, mv.map1, n_vars));
+    return Polynomial<T>(coeffs, std::move(new_exps), mv.vars, true);
+  }
+
 private:
   std::vector<T> coeffs;
   std::vector<std::vector<int>> exps;
@@ -242,5 +257,30 @@ Polynomial<double> operator+(const Variable& lv, const Variable& rv);
 Polynomial<double> operator-(const Variable& lv, const Variable& rv);
 Polynomial<double> operator*(const Variable& lv, const Variable& rv);
 Polynomial<double> pow(const Variable& var, int exp);
+
+// Scalar arithmetic (`x - 2.0`, `2.0 * x`, `0.0 * y`, ...), both orderings.
+// Both directions need an explicit free function: member-operator lookup
+// only searches the *declared* type of the left operand (Variable has no
+// operator- of its own, so `x - 2.0` never finds Polynomial<double>::
+// operator- even though Variable converts to it -- conversions are only
+// applied once a candidate is already found, and member lookup never looks
+// inside a type the operand merely converts to). Scalar-first additionally
+// can't go through any member function at all: the left operand there is a
+// bare double, which is never a class type.
+Polynomial<double> operator+(const Polynomial<double>& poly, double scalar);
+Polynomial<double> operator+(double scalar, const Polynomial<double>& poly);
+Polynomial<double> operator-(const Polynomial<double>& poly, double scalar);
+Polynomial<double> operator-(double scalar, const Polynomial<double>& poly);
+Polynomial<double> operator*(const Polynomial<double>& poly, double scalar);
+Polynomial<double> operator*(double scalar, const Polynomial<double>& poly);
+
+template <typename T>
+std::vector<Polynomial<T>> update_vars(std::vector<Polynomial<T>> polys,
+                                       const std::vector<Variable>& new_vars)
+{
+  for (auto& p : polys)
+    p = p.update_vars(new_vars);
+  return polys;
+}
 
 } // namespace hc
