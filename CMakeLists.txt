@@ -34,3 +34,5 @@ gtest_discover_tests(tests)
 find_package(benchmark REQUIRED)
 add_executable(benchmarks benchmarks/differentiation.cpp)
 target_link_libraries(benchmarks PRIVATE hc benchmark::benchmark)
+
+add_subdirectory(examples)
