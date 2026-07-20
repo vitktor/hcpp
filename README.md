@@ -1,2 +1,47 @@
 # hcpp
 Homotopy Continuation in C++
+
+## Example
+
+A 2-equation, 2-variable system: track the circle `G = {x^2 - 1, y^2 - 1}`
+(roots `(+-1,+-1)`) to `F = {x^2 + y^2 - 1, x - y}` (roots
+`(+-1/sqrt(2), +-1/sqrt(2))`). `G` has 4 roots but `F` only has 2, so two of
+the four paths necessarily diverge to infinity (the classical excess-Bezout
+phenomenon) -- track only the two that converge, `(1,1)` and `(-1,-1)`:
+
+```cpp
+#include <hc/hc.hpp>
+#include <iostream>
+
+using namespace hc;
+using cd = std::complex<double>;
+
+int main() {
+  Variable x("x"), y("y");
+
+  auto g1 = pow(x, 2) - 1.0;
+  auto g2 = pow(y, 2) - 1.0;
+  auto f1 = pow(x, 2) + pow(y, 2) - 1.0;
+  auto f2 = x - y;
+
+  System<double> start({g1, g2}, {x, y});
+  System<double> target({f1, f2}, {x, y});
+  StraightLineHomotopy<double> H(start, target);
+  EulerPredictor<double> predictor;
+
+  Tracker<double> tracker(H, predictor,
+                          /*corrector_tol=*/1e-12, /*corrector_max_iters=*/20,
+                          /*dt_init=*/0.05, /*dt_min=*/1e-9, /*dt_max=*/0.1,
+                          /*max_steps=*/1000);
+
+  for (auto x0 : std::vector<std::vector<cd>>{{cd(1, 0), cd(1, 0)}, {cd(-1, 0), cd(-1, 0)}}) {
+    auto result = tracker.track(x0, 0.0, 1.0);
+    std::cout << result.solution[0] << ", " << result.solution[1] << "\n";
+  }
+  // (~0.707, ~0), (~0.707, ~0)
+  // (~-0.707, ~0), (~-0.707, ~0)
+}
+```
+
+See `examples/` for more, including the "gamma trick" `StraightLineHomotopy`
+uses by default to steer paths clear of singularities.
