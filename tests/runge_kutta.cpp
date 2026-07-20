@@ -9,10 +9,12 @@ using cd = std::complex<double>;
 TEST(EulerPredictor, LinearHomotopyExactStep) {
   // G = x - 2, F = x - 5; H(x,t) = x - (2 + 3t), root(t) = 2 + 3t is linear in t,
   // so dx/dt = 3 everywhere and a single Euler step from t=1 to t=0 is exact.
+  // gamma=1 explicitly: a non-1 gamma makes root(t) a rational (Mobius)
+  // function of t instead, breaking the "exact in one step" property.
   Variable x("x");
   System<double> start({x - 2.0}, {x});
   System<double> target({x - 5.0}, {x});
-  StraightLineHomotopy<double> H(start, target);
+  StraightLineHomotopy<double> H(start, target, {.gamma = cd(1.0, 0.0)});
 
   EulerPredictor<double> predictor;
   std::vector<cd> x0{cd(5.0, 0.0)}; // root at t=1

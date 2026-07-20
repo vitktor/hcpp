@@ -48,7 +48,7 @@ int main() {
 
   System<double> start({g1, g2}, {x, y});
   System<double> target({f1, f2}, {x, y});
-  StraightLineHomotopy<double> H(start, target);
+  StraightLineHomotopy<double> H(start, target, {.gamma = cd(1.0, 0.0)});
   EulerPredictor<double> predictor;
 
   Tracker<double> tracker(H, predictor,

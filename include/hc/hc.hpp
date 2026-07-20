@@ -1,5 +1,6 @@
 #pragma once
 
+#include "util.hpp"
 #include "core/types.hpp"
 #include "core/polynomial.hpp"
 #include "core/calculus.hpp"

@@ -6,21 +6,18 @@
 #include <hc/core/calculus.hpp>
 #include <hc/core/system.hpp>
 #include <hc/homotopy/homotopy.hpp>
+#include <hc/util.hpp>
 
 namespace hc
 {
 
-// gamma defaults to 1 (plain straight-line homotopy); passing a non-real
-// gamma is the "gamma trick" (see e.g. Bates, Hauenstein, Sommese & Wampler,
-// "Numerically Solving Polynomial Systems with Bertini"): for all but a
-// measure-zero set of complex gamma, the resulting paths have no
-// singularities or crossings for t in [0,1). gamma doesn't change H's zero
-// set at t=0 (still gamma*start(x)=0 iff start(x)=0), so the known start
-// solutions remain valid regardless of gamma.
+// gamma defaults to a random unit-circle value (the "gamma trick", see
+// Bates, Hauenstein, Sommese & Wampler, "Numerically Solving Polynomial
+// Systems with Bertini"); pass gamma=1 explicitly for the plain homotopy.
 template <typename Scalar>
 struct StraightLineHomotopyOptions
 {
-  std::complex<Scalar> gamma = std::complex<Scalar>(1);
+  std::complex<Scalar> gamma = random_gamma<Scalar>();
 };
 
 // H(x,t) = gamma*(1-t)*start(x) + t*target(x). start and target must share

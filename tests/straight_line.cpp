@@ -31,7 +31,7 @@ TEST(StraightLineHomotopy, EvaluateWithJacobianAtStart) {
   auto f2 = x - y;
   System<double> start({g1, g2}, {x, y});
   System<double> target({f1, f2}, {x, y});
-  StraightLineHomotopy<double> H(start, target);
+  StraightLineHomotopy<double> H(start, target, {.gamma = cd(1.0, 0.0)});
 
   std::vector<cd> point{cd(1.0, 0.0), cd(1.0, 0.0)};
   std::vector<cd> H_out, Ht_out;
@@ -54,12 +54,12 @@ TEST(StraightLineHomotopy, EvaluateWithJacobianAtStart) {
   EXPECT_DOUBLE_EQ(Ht_out[1].real(), 0.0);
 }
 
-TEST(StraightLineHomotopy, GammaDefaultsToOne) {
+TEST(StraightLineHomotopy, GammaDefaultsToUnitCircle) {
   Variable x("x");
   System<double> start({x - 2.0}, {x});
   System<double> target({x - 5.0}, {x});
   StraightLineHomotopy<double> H(start, target);
-  EXPECT_EQ(H.gamma(), cd(1.0, 0.0));
+  EXPECT_NEAR(std::abs(H.gamma()), 1.0, 1e-12);
 }
 
 TEST(StraightLineHomotopy, GammaTrick) {
