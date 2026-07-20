@@ -33,6 +33,9 @@ TEST(Tracker, TracksNonlinearPathFromStartToTarget) {
 TEST(Tracker, TracksCircleAndLineFromStartToTarget) {
   // G = { x^2 - 1, y^2 - 1 } (known start solution (1,1) at t=0)
   // F = { x^2 + y^2 - 1, x - y } (target solution (1/sqrt2, 1/sqrt2) at t=1)
+  // Without a gamma trick this path hits a non-generic singularity around
+  // t=1/3 and fails (see examples/circle_and_line); gamma=0.6+0.8i steers
+  // it off the real axis and it converges cleanly in 12 steps.
   Variable x("x"), y("y");
   auto g1 = pow(x, 2) - 1.0;
   auto g2 = pow(y, 2) - 1.0;
@@ -40,7 +43,7 @@ TEST(Tracker, TracksCircleAndLineFromStartToTarget) {
   auto f2 = x - y;
   System<double> start({g1, g2}, {x, y});
   System<double> target({f1, f2}, {x, y});
-  StraightLineHomotopy<double> H(start, target);
+  StraightLineHomotopy<double> H(start, target, cd(0.6, 0.8));
   EulerPredictor<double> predictor;
 
   Tracker<double> tracker(H, predictor, 1e-12, 20, 0.05, 1e-8, 0.1, 200);

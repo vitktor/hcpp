@@ -49,7 +49,8 @@ std::common_type_t<T, S> evaluate(const Polynomial<T>& poly, const std::vector<S
   for (size_t i = 0; i < coeffs.size(); ++i) {
     R term = static_cast<R>(coeffs[i]);
     for (size_t j = 0; j < point.size(); ++j)
-      term *= std::pow(point[j], exps[i][j]);
+      if (exps[i][j] > 0)
+        term *= std::pow(point[j], exps[i][j]);
     result += term;
   }
   return result;

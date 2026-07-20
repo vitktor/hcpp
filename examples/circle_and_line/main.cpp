@@ -90,6 +90,25 @@ int main() {
   out << "Manual trace from (1,1), dt=0.02:\n";
   trace_path(out, H, predictor, {cd(1.0, 0.0), cd(1.0, 0.0)}, 0.5, 0.02, 60);
 
+  // Gamma trick: H = gamma*(1-t)*G + t*F for a fixed non-real unit gamma
+  // steers the paths off the real axis, avoiding the singularities above
+  // (see StraightLineHomotopy's gamma parameter).
+  cd gamma(0.6, 0.8);
+  StraightLineHomotopy<double> H_gamma(start, target, gamma);
+  Tracker<double> tracker_gamma(H_gamma, predictor, 1e-12, 20, 0.05, 1e-9, 0.1, 1000);
+  out << "\nWith gamma = " << gamma << ":\n";
+  for (const auto& x0 : start_solutions) {
+    auto result = tracker_gamma.track(x0, 0.0, 1.0);
+    out << "start (x,y) = (" << x0[0] << ", " << x0[1] << ")\n";
+    if (result.success) {
+      out << "  -> solution (x,y) = (" << result.solution[0] << ", " << result.solution[1]
+          << ")  (reached t=" << result.t << " in " << result.steps << " steps)\n\n";
+    } else {
+      out << "  -> FAILED (stalled at t=" << result.t << " after " << result.steps
+          << " steps)\n\n";
+    }
+  }
+
   std::cout << "Wrote results to " << HC_EXAMPLE_DIR << "/results.txt\n";
   return 0;
 }

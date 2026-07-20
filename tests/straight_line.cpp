@@ -54,6 +54,45 @@ TEST(StraightLineHomotopy, EvaluateWithJacobianAtStart) {
   EXPECT_DOUBLE_EQ(Ht_out[1].real(), 0.0);
 }
 
+TEST(StraightLineHomotopy, GammaDefaultsToOne) {
+  Variable x("x");
+  System<double> start({x - 2.0}, {x});
+  System<double> target({x - 5.0}, {x});
+  StraightLineHomotopy<double> H(start, target);
+  EXPECT_EQ(H.gamma(), cd(1.0, 0.0));
+}
+
+TEST(StraightLineHomotopy, GammaTrick) {
+  // G = x - 2, F = x - 5, gamma = i
+  // H(x,t) = i*(1-t)*(x-2) + t*(x-5)
+  Variable x("x");
+  System<double> start({x - 2.0}, {x});
+  System<double> target({x - 5.0}, {x});
+  cd gamma(0.0, 1.0);
+  StraightLineHomotopy<double> H(start, target, gamma);
+  EXPECT_EQ(H.gamma(), gamma);
+
+  std::vector<cd> point{cd(0.0, 0.0)};
+  std::vector<cd> H_out, Ht_out;
+  std::vector<std::vector<cd>> Hx_out;
+
+  // At t=0: H = gamma*G(x) = i*(0-2) = -2i
+  H.evaluate_with_jacobian(point, 0.0, H_out, Hx_out, Ht_out);
+  EXPECT_NEAR(H_out[0].real(), 0.0, 1e-12);
+  EXPECT_NEAR(H_out[0].imag(), -2.0, 1e-12);
+  // Hx(x,0) = gamma*Gx(x) = i*1 = i
+  EXPECT_NEAR(Hx_out[0][0].real(), 0.0, 1e-12);
+  EXPECT_NEAR(Hx_out[0][0].imag(), 1.0, 1e-12);
+  // Ht(x) = F(x) - gamma*G(x) = (0-5) - i*(0-2) = -5 + 2i
+  EXPECT_NEAR(Ht_out[0].real(), -5.0, 1e-12);
+  EXPECT_NEAR(Ht_out[0].imag(), 2.0, 1e-12);
+
+  // At t=1, H = F(x) regardless of gamma
+  H.evaluate(point, 1.0, H_out);
+  EXPECT_NEAR(H_out[0].real(), -5.0, 1e-12);
+  EXPECT_NEAR(H_out[0].imag(), 0.0, 1e-12);
+}
+
 TEST(StraightLineHomotopy, EvaluateWithJacobianAtTarget) {
   Variable x("x"), y("y");
   auto g1 = pow(x, 2) - 1.0;
