@@ -10,22 +10,29 @@
 namespace hc
 {
 
+// gamma defaults to 1 (plain straight-line homotopy); passing a non-real
+// gamma is the "gamma trick" (see e.g. Bates, Hauenstein, Sommese & Wampler,
+// "Numerically Solving Polynomial Systems with Bertini"): for all but a
+// measure-zero set of complex gamma, the resulting paths have no
+// singularities or crossings for t in [0,1). gamma doesn't change H's zero
+// set at t=0 (still gamma*start(x)=0 iff start(x)=0), so the known start
+// solutions remain valid regardless of gamma.
+template <typename Scalar>
+struct StraightLineHomotopyOptions
+{
+  std::complex<Scalar> gamma = std::complex<Scalar>(1);
+};
+
 // H(x,t) = gamma*(1-t)*start(x) + t*target(x). start and target must share
 // the same variable list in the same order, since Hx_out columns are
-// indexed by that shared order. gamma defaults to 1 (plain straight-line
-// homotopy); passing a non-real gamma is the "gamma trick" (see e.g. Bates,
-// Hauenstein, Sommese & Wampler, "Numerically Solving Polynomial Systems
-// with Bertini"): for all but a measure-zero set of complex gamma, the
-// resulting paths have no singularities or crossings for t in [0,1).
-// gamma doesn't change H's zero set at t=0 (still gamma*start(x)=0 iff
-// start(x)=0), so the known start solutions remain valid regardless of gamma.
+// indexed by that shared order.
 template <typename Scalar>
 class StraightLineHomotopy : public Homotopy<Scalar>
 {
 public:
   StraightLineHomotopy(System<Scalar> start, System<Scalar> target,
-                       std::complex<Scalar> gamma = std::complex<Scalar>(1))
-      : start_(std::move(start)), target_(std::move(target)), gamma_(gamma)
+                       StraightLineHomotopyOptions<Scalar> options = {})
+      : start_(std::move(start)), target_(std::move(target)), gamma_(options.gamma)
   {
   }
 

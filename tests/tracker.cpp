@@ -43,7 +43,7 @@ TEST(Tracker, TracksCircleAndLineFromStartToTarget) {
   auto f2 = x - y;
   System<double> start({g1, g2}, {x, y});
   System<double> target({f1, f2}, {x, y});
-  StraightLineHomotopy<double> H(start, target, cd(0.6, 0.8));
+  StraightLineHomotopy<double> H(start, target, {.gamma = cd(0.6, 0.8)});
   EulerPredictor<double> predictor;
 
   Tracker<double> tracker(H, predictor, 1e-12, 20, 0.05, 1e-8, 0.1, 200);

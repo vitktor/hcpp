@@ -94,7 +94,7 @@ int main() {
   // steers the paths off the real axis, avoiding the singularities above
   // (see StraightLineHomotopy's gamma parameter).
   cd gamma(0.6, 0.8);
-  StraightLineHomotopy<double> H_gamma(start, target, gamma);
+  StraightLineHomotopy<double> H_gamma(start, target, {.gamma = gamma});
   Tracker<double> tracker_gamma(H_gamma, predictor, 1e-12, 20, 0.05, 1e-9, 0.1, 1000);
   out << "\nWith gamma = " << gamma << ":\n";
   for (const auto& x0 : start_solutions) {

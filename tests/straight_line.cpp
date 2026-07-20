@@ -69,7 +69,7 @@ TEST(StraightLineHomotopy, GammaTrick) {
   System<double> start({x - 2.0}, {x});
   System<double> target({x - 5.0}, {x});
   cd gamma(0.0, 1.0);
-  StraightLineHomotopy<double> H(start, target, gamma);
+  StraightLineHomotopy<double> H(start, target, {.gamma = gamma});
   EXPECT_EQ(H.gamma(), gamma);
 
   std::vector<cd> point{cd(0.0, 0.0)};
