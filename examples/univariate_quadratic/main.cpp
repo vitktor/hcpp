@@ -32,13 +32,14 @@ int main() {
   std::ofstream out(std::string(HC_EXAMPLE_DIR) + "/results.txt");
   out << std::fixed << std::setprecision(10);
   out << "Tracking G(x) = x^2 - 4 (roots +-2) to F(x) = x^2 - 9 (roots +-3)\n";
-  out << "H(x,t) = (1-t)*G(x) + t*F(x), t: 0 -> 1\n\n";
+  out << "H(x,t) = gamma*(1-t)*G(x) + t*F(x), t: 0 -> 1\n";
+  out << "gamma = " << to_string(H.gamma()) << "\n\n";
 
   for (const auto& x0 : start_solutions) {
     auto result = tracker.track({x0}, 0.0, 1.0);
-    out << "start x = " << x0 << "\n";
+    out << "start x = " << to_string(x0) << "\n";
     if (result.success) {
-      out << "  -> solution x = " << result.solution[0]
+      out << "  -> solution x = " << to_string(result.solution[0])
           << "  (reached t=" << result.t << " in " << result.steps << " steps)\n\n";
     } else {
       out << "  -> FAILED (stalled at t=" << result.t << " after " << result.steps

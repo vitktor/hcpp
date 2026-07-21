@@ -22,8 +22,8 @@ static void trace_path(std::ofstream& out, const Homotopy<double>& H,
     predictor.predict(point, t, dt, H, predicted);
     double t_new = t + dt;
     auto result = corrector.correct(predicted, H, t_new);
-    out << "  step " << i << ": t=" << t_new << "  x=" << predicted[0]
-        << " y=" << predicted[1] << "  converged=" << result.converged
+    out << "  step " << i << ": t=" << t_new << "  x=" << to_string(predicted[0])
+        << " y=" << to_string(predicted[1]) << "  converged=" << result.converged
         << " iters=" << result.iterations << "\n";
     if (!result.converged) {
       out << "  -- Newton failed to converge here; stopping trace --\n";
@@ -68,9 +68,10 @@ int main() {
 
   for (const auto& x0 : start_solutions) {
     auto result = tracker.track(x0, 0.0, 1.0);
-    out << "start (x,y) = (" << x0[0] << ", " << x0[1] << ")\n";
+    out << "start (x,y) = (" << to_string(x0[0]) << ", " << to_string(x0[1]) << ")\n";
     if (result.success) {
-      out << "  -> solution (x,y) = (" << result.solution[0] << ", " << result.solution[1]
+      out << "  -> solution (x,y) = (" << to_string(result.solution[0]) << ", "
+          << to_string(result.solution[1])
           << ")  (reached t=" << result.t << " in " << result.steps << " steps)\n\n";
     } else {
       out << "  -> FAILED (stalled at t=" << result.t << " after " << result.steps
@@ -96,12 +97,13 @@ int main() {
   cd gamma(0.6, 0.8);
   StraightLineHomotopy<double> H_gamma(start, target, {.gamma = gamma});
   Tracker<double> tracker_gamma(H_gamma, predictor, 1e-12, 20, 0.05, 1e-9, 0.1, 1000);
-  out << "\nWith gamma = " << gamma << ":\n";
+  out << "\nWith gamma = " << to_string(gamma) << ":\n";
   for (const auto& x0 : start_solutions) {
     auto result = tracker_gamma.track(x0, 0.0, 1.0);
-    out << "start (x,y) = (" << x0[0] << ", " << x0[1] << ")\n";
+    out << "start (x,y) = (" << to_string(x0[0]) << ", " << to_string(x0[1]) << ")\n";
     if (result.success) {
-      out << "  -> solution (x,y) = (" << result.solution[0] << ", " << result.solution[1]
+      out << "  -> solution (x,y) = (" << to_string(result.solution[0]) << ", "
+          << to_string(result.solution[1])
           << ")  (reached t=" << result.t << " in " << result.steps << " steps)\n\n";
     } else {
       out << "  -> FAILED (stalled at t=" << result.t << " after " << result.steps

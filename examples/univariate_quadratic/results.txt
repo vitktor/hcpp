@@ -1,9 +1,10 @@
 Tracking G(x) = x^2 - 4 (roots +-2) to F(x) = x^2 - 9 (roots +-3)
-H(x,t) = (1-t)*G(x) + t*F(x), t: 0 -> 1
+H(x,t) = gamma*(1-t)*G(x) + t*F(x), t: 0 -> 1
+gamma = 0.771133-0.636675j
 
-start x = (2.0000000000,0.0000000000)
-  -> solution x = (3.0000000000,0.0000000000)  (reached t=1.0000000000 in 12 steps)
+start x = 2.000000+0.000000j
+  -> solution x = 3.000000+0.000000j  (reached t=1.0000000000 in 12 steps)
 
-start x = (-2.0000000000,0.0000000000)
-  -> solution x = (-3.0000000000,-0.0000000000)  (reached t=1.0000000000 in 12 steps)
+start x = -2.000000+0.000000j
+  -> solution x = -3.000000-0.000000j  (reached t=1.0000000000 in 12 steps)
 

@@ -3,18 +3,23 @@ Homotopy Continuation in C++
 
 ## Example
 
-A 2-equation, 2-variable system: track the circle `G = {x^2 - 1, y^2 - 1}`
+A 2-equation, 2-variable system: track `G = {x^2 - 1, y^2 - 1}`
 (roots `(+-1,+-1)`) to `F = {x^2 + y^2 - 1, x - y}` (roots
 `(+-1/sqrt(2), +-1/sqrt(2))`). `G` has 4 roots but `F` only has 2, so two of
-the four paths necessarily diverge to infinity (the classical excess-Bezout
-phenomenon) -- track only the two that converge, `(1,1)` and `(-1,-1)`:
+the four paths necessarily diverge to infinity. We track only the two that converge, `(1,1)` and `(-1,-1)`:
 
 ```cpp
 #include <hc/hc.hpp>
 #include <iostream>
+#include <string>
 
 using namespace hc;
 using cd = std::complex<double>;
+
+std::string fmt(cd z) {
+  double im = z.imag();
+  return std::to_string(z.real()) + (im < 0 ? "-" : "+") + std::to_string(std::abs(im)) + "j";
+}
 
 int main() {
   Variable x("x"), y("y");
@@ -36,10 +41,10 @@ int main() {
 
   for (auto x0 : std::vector<std::vector<cd>>{{cd(1, 0), cd(1, 0)}, {cd(-1, 0), cd(-1, 0)}}) {
     auto result = tracker.track(x0, 0.0, 1.0);
-    std::cout << result.solution[0] << ", " << result.solution[1] << "\n";
+    std::cout << fmt(result.solution[0]) << ", " << fmt(result.solution[1]) << "\n";
   }
-  // (~0.707, ~0), (~0.707, ~0)
-  // (~-0.707, ~0), (~-0.707, ~0)
+  // 0.707107+0.000000j, 0.707107+0.000000j
+  // -0.707107-0.000000j, -0.707107-0.000000j
 }
 ```
 
