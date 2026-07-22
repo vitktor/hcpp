@@ -25,6 +25,7 @@ TEST(Tracker, TracksNonlinearPathFromStartToTarget) {
   auto result = tracker.track({cd(2.0, 0.0)}, 0.0, 1.0);
 
   EXPECT_TRUE(result.success);
+  EXPECT_EQ(result.status, PathStatus::Success);
   EXPECT_NEAR(result.t, 1.0, 1e-9);
   EXPECT_NEAR(result.solution[0].real(), 3.0, 1e-8);
   EXPECT_NEAR(result.solution[0].imag(), 0.0, 1e-8);
@@ -93,6 +94,28 @@ TEST(Tracker, FailsWhenStepBudgetExhausted) {
   auto result = tracker.track({cd(2.0, 0.0)}, 0.0, 1.0);
 
   EXPECT_FALSE(result.success);
+  EXPECT_EQ(result.status, PathStatus::Failed);
   EXPECT_EQ(result.steps, 1);
   EXPECT_NEAR(result.t, 0.1, 1e-9);
+}
+
+TEST(Tracker, DetectsDivergingPath) {
+  // G = x - 2, F = x - 5, gamma = -1: eliminating x from H=0 gives
+  // x(t) = (-2 + 7t) / (2t - 1), an exact rational function of t with a
+  // genuine pole at t=0.5 (not a branch point -- x(t) is single-valued and
+  // smooth elsewhere, so this diverges the same way regardless of step
+  // size, unlike a path that runs through an actual singularity).
+  Variable x("x");
+  System<double> start({x - 2.0}, {x});
+  System<double> target({x - 5.0}, {x});
+  StraightLineHomotopy<double> H(start, target, {.gamma = cd(-1.0, 0.0)});
+  EulerPredictor<double> predictor;
+
+  Tracker<double> tracker(H, predictor, 1e-12, 20, 0.01, 1e-9, 0.02, 2000, /*max_norm=*/50.0);
+  auto result = tracker.track({cd(2.0, 0.0)}, 0.0, 1.0);
+
+  EXPECT_FALSE(result.success);
+  EXPECT_EQ(result.status, PathStatus::Diverged);
+  EXPECT_LT(result.t, 0.5);
+  EXPECT_GT(std::abs(result.solution[0]), 50.0);
 }

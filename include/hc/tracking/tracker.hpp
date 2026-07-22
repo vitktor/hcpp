@@ -4,6 +4,7 @@
 #include <limits>
 #include <vector>
 
+#include <hc/core/types.hpp>
 #include <hc/homotopy/homotopy.hpp>
 #include <hc/tracking/corrector.hpp>
 #include <hc/tracking/predictor.hpp>
@@ -17,6 +18,7 @@ struct TrackResult
 {
   std::vector<std::complex<Scalar>> solution;
   bool success;
+  PathStatus status;
   Scalar t;
   int steps;
 };
@@ -31,10 +33,11 @@ class Tracker
 public:
   Tracker(const Homotopy<Scalar>& H, const Predictor<Scalar>& predictor,
          Scalar corrector_tol, int corrector_max_iters,
-         Scalar dt_init, Scalar dt_min, Scalar dt_max, int max_steps)
+         Scalar dt_init, Scalar dt_min, Scalar dt_max, int max_steps,
+         Scalar max_norm = Scalar(1e6))
       : H_(H), predictor_(predictor), corrector_tol_(corrector_tol),
         corrector_max_iters_(corrector_max_iters), dt_init_(dt_init),
-        dt_min_(dt_min), dt_max_(dt_max), max_steps_(max_steps)
+        dt_min_(dt_min), dt_max_(dt_max), max_steps_(max_steps), max_norm_(max_norm)
   {
   }
 
@@ -51,7 +54,7 @@ public:
     {
       Scalar remaining = direction * (t_end - t);
       if (remaining <= eps)
-        return {std::move(x), true, t, i};
+        return {std::move(x), true, PathStatus::Success, t, i};
 
       Scalar dt = direction * std::min(step.step_size(), remaining);
 
@@ -65,19 +68,30 @@ public:
         x = std::move(predicted);
         t = t_new;
         step.on_success();
+
+        if (diverged(x))
+          return {std::move(x), false, PathStatus::Diverged, t, i + 1};
       }
       else
       {
         step.on_failure();
         if (step.step_size() <= dt_min_)
-          return {std::move(x), false, t, i + 1};
+          return {std::move(x), false, PathStatus::Failed, t, i + 1};
       }
     }
 
-    return {std::move(x), false, t, max_steps_};
+    return {std::move(x), false, PathStatus::Failed, t, max_steps_};
   }
 
 private:
+  bool diverged(const std::vector<std::complex<Scalar>>& x) const
+  {
+    for (const auto& xi : x)
+      if (std::abs(xi) > max_norm_)
+        return true;
+    return false;
+  }
+
   const Homotopy<Scalar>& H_;
   const Predictor<Scalar>& predictor_;
   Scalar corrector_tol_;
@@ -86,6 +100,7 @@ private:
   Scalar dt_min_;
   Scalar dt_max_;
   int max_steps_;
+  Scalar max_norm_;
 };
 
 } // namespace hc
