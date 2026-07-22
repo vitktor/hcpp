@@ -1,9 +1,42 @@
 # hcpp
 Homotopy Continuation in C++
 
-## Example
+## Solver
 
-A 2-equation, 2-variable system: track `G = {x^2 - 1, y^2 - 1}`
+Solve `F = {x^2 + y^2 - 1, x^2 - y}` (a circle intersected with a parabola).
+The Bezout number is 4, but only 2 of the 4 solutions are real -- `Solver`
+finds all of them:
+
+```cpp
+#include <hc/hc.hpp>
+#include <iostream>
+
+using namespace hc;
+
+int main() {
+  Variable x("x"), y("y");
+  System<double> target({pow(x, 2) + pow(y, 2) - 1.0, pow(x, 2) - y}, {x, y});
+
+  Solver<double> solver;
+  auto result = solver.solve(target);
+
+  for (const auto& sol : result.solutions())
+    std::cout << to_string(sol[0]) << ", " << to_string(sol[1]) << "\n";
+  // 0.786151+0.000000j, 0.618034+0.000000j
+  // 0.000000+1.272020j, -1.618034+0.000000j
+  // -0.786151-0.000000j, 0.618034+0.000000j
+  // 0.000000-1.272020j, -1.618034+0.000000j
+}
+```
+
+See `examples/solving` for more, including filtering to just the real
+solutions via `result.real_solutions()`.
+
+## Tracking
+
+`Solver` builds its start system and tracks every path automatically. You
+can also drive a single path yourself for more control. A 2-equation,
+2-variable system: track `G = {x^2 - 1, y^2 - 1}`
 (roots `(+-1,+-1)`) to `F = {x^2 + y^2 - 1, x - y}` (roots
 `(+-1/sqrt(2), +-1/sqrt(2))`). `G` has 4 roots but `F` only has 2, so two of
 the four paths necessarily diverge to infinity. We track only the two that converge, `(1,1)` and `(-1,-1)`:
@@ -48,5 +81,5 @@ int main() {
 }
 ```
 
-See `examples/` for more, including the "gamma trick" `StraightLineHomotopy`
-uses by default to steer paths clear of singularities.
+See `examples/tracking` for more, including the "gamma trick"
+`StraightLineHomotopy` uses by default to steer paths clear of singularities.
