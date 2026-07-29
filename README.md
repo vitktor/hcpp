@@ -1,10 +1,10 @@
 # hcpp
-Homotopy Continuation in C++
+A C++ library for solving systems of polynomial equations using numerical homotopy continuation.
 
 ## Solver
 
 Solve `F = {x^2 + y^2 - 1, x^2 - y}` (a circle intersected with a parabola).
-The Bezout number is 4, but only 2 of the 4 solutions are real -- `Solver`
+The Bezout number is 4, but only 2 of the 4 solutions are real. `Solver`
 finds all of them:
 
 ```cpp
@@ -15,10 +15,10 @@ using namespace hc;
 
 int main() {
   Variable x("x"), y("y");
-  System<double> target({pow(x, 2) + pow(y, 2) - 1.0, pow(x, 2) - y}, {x, y});
+  System<double> F({pow(x, 2) + pow(y, 2) - 1.0, pow(x, 2) - y}, {x, y});
 
   Solver<double> solver;
-  auto result = solver.solve(target);
+  auto result = solver.solve(F);
 
   for (const auto& sol : result.solutions())
     std::cout << to_string(sol[0]) << ", " << to_string(sol[1]) << "\n";
@@ -44,15 +44,9 @@ the four paths necessarily diverge to infinity. We track only the two that conve
 ```cpp
 #include <hc/hc.hpp>
 #include <iostream>
-#include <string>
 
 using namespace hc;
 using cd = std::complex<double>;
-
-std::string fmt(cd z) {
-  double im = z.imag();
-  return std::to_string(z.real()) + (im < 0 ? "-" : "+") + std::to_string(std::abs(im)) + "j";
-}
 
 int main() {
   Variable x("x"), y("y");
@@ -74,12 +68,12 @@ int main() {
 
   for (auto x0 : std::vector<std::vector<cd>>{{cd(1, 0), cd(1, 0)}, {cd(-1, 0), cd(-1, 0)}}) {
     auto result = tracker.track(x0, 0.0, 1.0);
-    std::cout << fmt(result.solution[0]) << ", " << fmt(result.solution[1]) << "\n";
+    std::cout << to_string(result.solution[0]) << ", " << to_string(result.solution[1]) << "\n";
   }
   // 0.707107+0.000000j, 0.707107+0.000000j
   // -0.707107-0.000000j, -0.707107-0.000000j
 }
 ```
 
-See `examples/tracking` for more, including the "gamma trick"
-`StraightLineHomotopy` uses by default to steer paths clear of singularities.
+See `examples/tracking` for more, including the "gamma trick" that
+`StraightLineHomotopy` uses by default to keep paths away from singularities.
