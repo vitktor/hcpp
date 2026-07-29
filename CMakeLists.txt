@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Eigen3 REQUIRED)
 find_package(GTest REQUIRED)
+find_package(Boost REQUIRED)
 enable_testing()
 
 add_library(hc
@@ -24,9 +25,9 @@ add_library(hc
 )
 
 target_include_directories(hc PUBLIC include)
-target_link_libraries(hc PUBLIC Eigen3::Eigen)
+target_link_libraries(hc PUBLIC Eigen3::Eigen Boost::headers)
 
-add_executable(tests tests/variable.cpp tests/polynomial.cpp tests/system.cpp tests/calculus.cpp tests/straight_line.cpp tests/corrector.cpp tests/runge_kutta.cpp tests/step_control.cpp tests/tracker.cpp tests/total_degree.cpp tests/solver.cpp)
+add_executable(tests tests/variable.cpp tests/polynomial.cpp tests/system.cpp tests/calculus.cpp tests/straight_line.cpp tests/corrector.cpp tests/runge_kutta.cpp tests/step_control.cpp tests/tracker.cpp tests/total_degree.cpp tests/solver.cpp tests/multiprecision.cpp)
 target_link_libraries(tests PRIVATE hc GTest::gtest_main)
 include(GoogleTest)
 gtest_discover_tests(tests)

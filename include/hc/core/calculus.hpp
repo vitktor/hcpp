@@ -49,8 +49,14 @@ std::common_type_t<T, S> evaluate(const Polynomial<T>& poly, const std::vector<S
   for (size_t i = 0; i < coeffs.size(); ++i) {
     R term = static_cast<R>(coeffs[i]);
     for (size_t j = 0; j < point.size(); ++j)
-      if (exps[i][j] > 0)
-        term *= std::pow(point[j], exps[i][j]);
+    {
+      // Manual loop instead of std::pow: std::pow's generic overload
+      // requires is_arithmetic, which excludes arbitrary-precision Scalar
+      // types (e.g. Boost.Multiprecision) even though they support `*`.
+      R base = static_cast<R>(point[j]);
+      for (int k = 0; k < exps[i][j]; ++k)
+        term *= base;
+    }
     result += term;
   }
   return result;
