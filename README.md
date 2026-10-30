@@ -77,3 +77,49 @@ int main() {
 
 See `examples/tracking` for more, including the "gamma trick" that
 `StraightLineHomotopy` uses by default to keep paths away from singularities.
+
+## Monodromy
+
+For a parametric family `F(x; p)`, `MonodromySolver` finds all solutions at a
+generic parameter point from just one known solution: it tracks solutions
+around random loops in parameter space, and since the loops permute the
+solutions, every endpoint is again a solution. `ParameterHomotopy` then moves
+them to the parameters you actually care about. Parameters are ordinary
+`Variable`s of the `System`; you only say which ones they are:
+
+```cpp
+#include <hc/hc.hpp>
+#include <iostream>
+
+using namespace hc;
+using cd = std::complex<double>;
+
+int main() {
+  Variable x("x"), y("y"), a("a"), b("b");
+  System<double> F({pow(x, 2) + pow(y, 2) - a, x * y - b});
+  std::vector<Variable> params{a, b};
+
+  // Start pair: choose (x0, y0) freely, then (a0, b0) so that it solves F.
+  cd x0(0.4, -0.2), y0(-0.9, 0.6);
+  std::vector<cd> p0{x0 * x0 + y0 * y0, x0 * y0};
+
+  MonodromySolver<double> solver;
+  auto result = solver.solve(F, params, {x0, y0}, p0);  // 4 solutions at p0
+
+  ParameterHomotopy<double> H(F, params, p0, {cd(5.0), cd(2.0)});
+  EulerPredictor<double> predictor;
+  Tracker<double> tracker(H, predictor, 1e-12, 3, 0.05, 1e-9, 0.1, 1000);
+  for (const auto& sol : result.solutions) {
+    auto r = tracker.track(sol, 0.0, 1.0);
+    std::cout << to_string(r.solution[0]) << ", " << to_string(r.solution[1]) << "\n";
+  }
+  // -1.000000+0.000000j, -2.000000-0.000000j
+  // 2.000000+0.000000j, 1.000000-0.000000j
+  // -2.000000-0.000000j, -1.000000+0.000000j
+  // 1.000000-0.000000j, 2.000000+0.000000j
+}
+```
+
+Without `target_solutions_count`, the solver stops once
+`max_loops_no_progress` new loops in a row found nothing new, so the result
+can be incomplete; set the count when you know it. See `examples/monodromy`.

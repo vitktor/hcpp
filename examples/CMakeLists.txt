@@ -17,3 +17,8 @@ add_executable(solving_circle_and_parabola solving/circle_and_parabola/main.cpp)
 target_link_libraries(solving_circle_and_parabola PRIVATE hc)
 target_compile_definitions(solving_circle_and_parabola PRIVATE
     HC_EXAMPLE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/solving/circle_and_parabola")
+
+add_executable(monodromy_circle_and_hyperbola monodromy/circle_and_hyperbola/main.cpp)
+target_link_libraries(monodromy_circle_and_hyperbola PRIVATE hc)
+target_compile_definitions(monodromy_circle_and_hyperbola PRIVATE
+    HC_EXAMPLE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/monodromy/circle_and_hyperbola")
