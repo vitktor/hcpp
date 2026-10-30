@@ -25,3 +25,4 @@
 #include "solver/solver_options.hpp"
 #include "solver/solver.hpp"
 #include "solver/result.hpp"
+#include "solver/monodromy.hpp"

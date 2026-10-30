@@ -27,7 +27,7 @@ add_library(hc
 target_include_directories(hc PUBLIC include)
 target_link_libraries(hc PUBLIC Eigen3::Eigen Boost::headers)
 
-add_executable(tests tests/variable.cpp tests/polynomial.cpp tests/system.cpp tests/calculus.cpp tests/straight_line.cpp tests/corrector.cpp tests/runge_kutta.cpp tests/step_control.cpp tests/tracker.cpp tests/total_degree.cpp tests/solver.cpp tests/multiprecision.cpp tests/parameter_homotopy.cpp)
+add_executable(tests tests/variable.cpp tests/polynomial.cpp tests/system.cpp tests/calculus.cpp tests/straight_line.cpp tests/corrector.cpp tests/runge_kutta.cpp tests/step_control.cpp tests/tracker.cpp tests/total_degree.cpp tests/solver.cpp tests/multiprecision.cpp tests/parameter_homotopy.cpp tests/monodromy.cpp)
 target_link_libraries(tests PRIVATE hc GTest::gtest_main)
 include(GoogleTest)
 gtest_discover_tests(tests)
