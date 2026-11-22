@@ -13,6 +13,7 @@ struct SolverOptions
   Scalar dt_max = Scalar(0.1);
   int max_steps = 1000;
   Scalar max_norm = Scalar(1e6);
+  bool verbose = false;
 };
 
 } // namespace hc
