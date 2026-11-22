@@ -1,5 +1,6 @@
 #pragma once
 #include <complex>
+#include <iostream>
 #include <optional>
 
 namespace hc
@@ -15,7 +16,10 @@ struct SolverOptions
   Scalar dt_max = Scalar(0.1);
   int max_steps = 1000;
   Scalar max_norm = Scalar(1e6);
+  // Print a line per finished path to `log` while tracking.
   bool verbose = false;
+  // Where verbose progress goes; must outlive the solve.
+  std::ostream* log = &std::clog;
   // Worker threads for path tracking; 0 = one per hardware thread.
   int threads = 0;
   // Gamma for the straight-line homotopy; unset = a fresh random_gamma()

@@ -1,5 +1,8 @@
 #include <algorithm>
 #include <atomic>
+#include <regex>
+#include <set>
+#include <sstream>
 #include <stdexcept>
 #include <vector>
 
@@ -74,6 +77,45 @@ TEST(ParallelSolver, ThreadCountDoesNotChangeResult) {
       EXPECT_EQ(par.paths[i].solution, serial.paths[i].solution) << "path " << i; // bitwise
     }
   }
+}
+
+TEST(ParallelSolver, VerboseProgressLinesAreIntact) {
+  // 32 paths on 8 threads all report to one stream. Every line must be
+  // whole (no interleaving), the finished counter must run 1..32 in order,
+  // and every path must be reported exactly once.
+  auto F = coupled_quadratics();
+  std::ostringstream log;
+  SolverOptions<double> opts;
+  opts.threads = 8;
+  opts.verbose = true;
+  opts.log = &log;
+  auto result = Solver<double>(opts).solve(F);
+
+  std::regex line_re(R"(\[(\d+)/32\] path (\d+): (success|diverged|failed), (\d+) steps)");
+  std::istringstream lines(log.str());
+  std::string line;
+  size_t count = 0;
+  std::set<size_t> paths_seen;
+  while (std::getline(lines, line)) {
+    std::smatch m;
+    ASSERT_TRUE(std::regex_match(line, m, line_re)) << "garbled line: " << line;
+    ++count;
+    EXPECT_EQ(std::stoul(m[1]), count);
+    size_t path = std::stoul(m[2]);
+    EXPECT_TRUE(paths_seen.insert(path).second) << "path " << path << " reported twice";
+    EXPECT_EQ(m[3], to_string(result.paths[path].status));
+    EXPECT_EQ(std::stoi(m[4]), result.paths[path].steps);
+  }
+  EXPECT_EQ(count, 32u);
+}
+
+TEST(ParallelSolver, QuietByDefault) {
+  auto F = coupled_quadratics();
+  std::ostringstream log;
+  SolverOptions<double> opts;
+  opts.log = &log;
+  Solver<double>(opts).solve(F);
+  EXPECT_TRUE(log.str().empty());
 }
 
 TEST(ParallelMonodromy, ThreadCountDoesNotChangeResult) {
