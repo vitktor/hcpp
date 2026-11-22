@@ -7,6 +7,8 @@
 namespace hc
 {
 
+// Thread safety: predict() is called concurrently on one shared instance,
+// so implementations must not modify shared state (see Homotopy).
 template <typename Scalar>
 class Predictor
 {

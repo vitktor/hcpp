@@ -1,6 +1,7 @@
 #pragma once
 
 #include <hc/core/system.hpp>
+#include <hc/parallel.hpp>
 #include <hc/homotopy/straight_line.hpp>
 #include <hc/solver/result.hpp>
 #include <hc/solver/solver_options.hpp>
@@ -15,6 +16,11 @@ namespace hc
 // every one of its start solutions to target via a StraightLineHomotopy
 // (its default random gamma providing the genericity needed to avoid path
 // crossings/singularities), and collecting the results.
+//
+// Paths are tracked in parallel on options.threads threads. The homotopy,
+// predictor and tracker are shared read-only (all their tracking methods are
+// const), and each path writes only its own slot of result.paths, so
+// results come back in start-solution order regardless of thread count.
 template <typename Scalar>
 class Solver
 {
@@ -24,16 +30,21 @@ public:
   Result<Scalar> solve(const System<Scalar>& target) const
   {
     TotalDegreeSystem<Scalar> start(target);
-    StraightLineHomotopy<Scalar> H(start.system(), target);
+    StraightLineHomotopyOptions<Scalar> h_options;
+    if (options_.gamma)
+      h_options.gamma = *options_.gamma;
+    StraightLineHomotopy<Scalar> H(start.system(), target, h_options);
     EulerPredictor<Scalar> predictor;
     Tracker<Scalar> tracker(H, predictor, options_.corrector_tol, options_.corrector_max_iters,
                             options_.dt_init, options_.dt_min, options_.dt_max,
                             options_.max_steps, options_.max_norm);
 
+    const auto& starts = start.start_solutions();
     Result<Scalar> result;
-    result.paths.reserve(start.start_solutions().size());
-    for (const auto& x_start : start.start_solutions())
-      result.paths.push_back(tracker.track(x_start, Scalar(0), Scalar(1)));
+    result.paths.resize(starts.size());
+    parallel_for(starts.size(), options_.threads, [&](int, size_t i) {
+      result.paths[i] = tracker.track(starts[i], Scalar(0), Scalar(1));
+    });
     return result;
   }
 
