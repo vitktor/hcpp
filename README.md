@@ -29,6 +29,10 @@ int main() {
 }
 ```
 
+Paths are tracked in parallel on all hardware threads by default; set
+`SolverOptions::threads` (or `MonodromyOptions::threads`) to limit this.
+The result does not depend on the thread count.
+
 See `examples/solving` for more, including filtering to just the real
 solutions via `result.real_solutions()`.
 

@@ -5,6 +5,11 @@
 namespace hc
 {
 
+// Thread safety: the const methods are called concurrently from several
+// threads on one shared instance (Solver tracks paths in parallel), so they
+// must not modify shared state -- no mutable caches or scratch buffers in
+// members. Non-const methods (e.g. ParameterHomotopy::set_parameters) need a
+// separate instance per thread.
 template <typename Scalar>
 class Homotopy
 {

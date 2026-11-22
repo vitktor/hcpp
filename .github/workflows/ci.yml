@@ -24,3 +24,23 @@ jobs:
 
       - name: Test
         run: ctest --test-dir build/release --output-on-failure
+
+  tsan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: sudo apt-get install -y libeigen3-dev libgtest-dev libbenchmark-dev libboost-dev
+
+      - name: Configure
+        run: cmake -S . -B build/tsan -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_CXX_FLAGS="-fsanitize=thread"
+
+      - name: Build
+        run: cmake --build build/tsan --target tests -j
+
+      - name: Test
+        run: ./build/tsan/tests
+        env:
+          TSAN_OPTIONS: halt_on_error=1

@@ -1,4 +1,6 @@
 #pragma once
+#include <complex>
+#include <optional>
 
 namespace hc
 {
@@ -13,6 +15,11 @@ struct SolverOptions
   Scalar dt_max = Scalar(0.1);
   int max_steps = 1000;
   Scalar max_norm = Scalar(1e6);
+  // Worker threads for path tracking; 0 = one per hardware thread.
+  int threads = 0;
+  // Gamma for the straight-line homotopy; unset = a fresh random_gamma()
+  // per solve. Fixing it makes repeated solves track identical paths.
+  std::optional<std::complex<Scalar>> gamma;
 };
 
 } // namespace hc
