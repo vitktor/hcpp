@@ -32,8 +32,8 @@ public:
 
     Result<Scalar> result;
     result.paths.reserve(start.start_solutions().size());
-    for (const auto& x0 : start.start_solutions())
-      result.paths.push_back(tracker.track(x0, Scalar(0), Scalar(1)));
+    for (const auto& x_start : start.start_solutions())
+      result.paths.push_back(tracker.track(x_start, Scalar(0), Scalar(1)));
     return result;
   }
 
