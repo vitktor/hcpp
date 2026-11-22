@@ -1,6 +1,9 @@
 #pragma once
+#include <cstddef>
+#include <mutex>
 
 #include <hc/core/system.hpp>
+#include <hc/core/types.hpp>
 #include <hc/parallel.hpp>
 #include <hc/homotopy/straight_line.hpp>
 #include <hc/solver/result.hpp>
@@ -21,6 +24,11 @@ namespace hc
 // predictor and tracker are shared read-only (all their tracking methods are
 // const), and each path writes only its own slot of result.paths, so
 // results come back in start-solution order regardless of thread count.
+//
+// With options.verbose, each worker reports its finished path to
+// options.log. Those writes share one stream and one counter, so they go
+// through a mutex: unguarded, concurrent writes to a std::ostream are a data
+// race and lines from different threads would interleave.
 template <typename Scalar>
 class Solver
 {
@@ -42,8 +50,20 @@ public:
     const auto& starts = start.start_solutions();
     Result<Scalar> result;
     result.paths.resize(starts.size());
+    std::mutex log_mutex;
+    std::size_t finished = 0; // guarded by log_mutex
     parallel_for(starts.size(), options_.threads, [&](int, size_t i) {
       result.paths[i] = tracker.track(starts[i], Scalar(0), Scalar(1));
+      if (options_.verbose)
+      {
+        const auto& path = result.paths[i];
+        // Increment and print under one lock, so the counter in the output
+        // runs 1, 2, ..., n in order.
+        std::lock_guard lock(log_mutex);
+        ++finished;
+        *options_.log << "[" << finished << "/" << starts.size() << "] path " << i << ": "
+                      << to_string(path.status) << ", " << path.steps << " steps\n";
+      }
     });
     return result;
   }
